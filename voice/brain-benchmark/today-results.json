@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "Authenticated preview, recurring occurrences, discard without saving, explicit save and correct Manila agenda",
+    "Invalid imports preserve saved data; stale removal and stale briefing requests are rejected",
+    "Actual local spoken briefing and highlights; global interruption; removing the snapshot clears stale cards and replay",
+    "Brief me phrase trigger, 390/320 layouts, no page errors or external requests",
+    "Actual restart preserves the imported calendar, source metadata and occurrences",
+    "Temporary calendar and task removed after verification"
+  ]
+}

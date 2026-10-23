@@ -1,0 +1,15 @@
+{
+  "purpose": "Personal, noncommercial voice evaluation only",
+  "model": "k2-fsa/OmniVoice",
+  "model_license": "CC-BY-NC; not approved as Lin's business-production engine",
+  "sample_rate": 24000,
+  "profiles": [
+    {"id": "a", "label": "Lin A — conversational", "instruct": "female, young adult, moderate pitch", "seed": 42},
+    {"id": "b", "label": "Lin B — lower register", "instruct": "female, middle-aged, low pitch", "seed": 123}
+  ],
+  "lines": [
+    {"id": "english", "language_id": "en", "text": "Good morning. Your plan is ready. Let's start with the most important task."},
+    {"id": "filipino", "language_id": "fil", "text": "Magandang umaga. Handa na ang plano mo. Unahin natin ang pinakamahalagang gawain."},
+    {"id": "cebuano", "language_id": "ceb", "text": "Maayong buntag. Andam na ang imong plano. Unahon nato ang labing importanteng buluhaton."}
+  ]
+}

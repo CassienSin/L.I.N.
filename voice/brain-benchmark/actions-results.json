@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "checks": [
+    "Rule routing for add, complete, agenda, free-time, task, plan and notes phrasings with no model call; questions never become writes; model routes are reduced to allowed tools and fields",
+    "Proposals write nothing; wrong or missing hashes are refused; edits issue a new hash that voids the old approval; approval executes exactly once",
+    "Receipts survive a restart, a reopened store refuses duplicate execution, and undo removes the added task once",
+    "Rejected and expired proposals execute nothing",
+    "An interrupted execution is reported as unknown after restart and is never retried automatically",
+    "Completing a task needs one unambiguous match, refuses a task edited after review, and undo reopens it",
+    "Agenda and free-time tools use only the imported snapshot, mark finished/upcoming events, ignore all-day events for availability, flag tentative, stale and uncovered data",
+    "Notes tool returns cited passages as data; instructions inside a note cannot create a proposal",
+    "Generated answers that echo the data block, cite times or time ranges absent from it (such as calling a partly booked period free), or claim a change are replaced with the deterministic summary"
+  ]
+}

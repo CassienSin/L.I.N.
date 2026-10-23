@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "automatic_stop_ms": 30013,
+  "checks": [
+    "Automatic 30-second stop releases all tracks",
+    "Discarded in-flight transcription cannot restore the transcript"
+  ]
+}

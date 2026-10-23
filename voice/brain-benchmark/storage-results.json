@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "checks": [
+    "Search returns the actual matching file passage and exact line range",
+    "Persistence, correction history, optimistic conflict checks and personal/business scopes",
+    "Forget removes the fact, history and retrieval index",
+    "Hash-based edits, moved files and deleted files invalidate old sources",
+    "Actual Windows junction and out-of-root file are excluded",
+    "Size/encoding limits and disconnect/reconnect persist without deleting files",
+    "Document instructions are retrieved as text and cannot mutate memory"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "Permission denial displays actionable recovery with microphone off",
+    "Recovery is an explicit authenticated request",
+    "Recovery does not request microphone access again",
+    "Recovery panel fits at 1000, 390 and 320 px",
+    "Real microphone never accessed in this test"
+  ]
+}

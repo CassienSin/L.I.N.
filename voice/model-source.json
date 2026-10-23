@@ -1,0 +1,67 @@
+{
+  "repository": "k2-fsa/OmniVoice",
+  "revision": "c5fdb5ccb189668d56333f77ba2629f4cd7535f4",
+  "files": [
+    {
+      "rfilename": "README.md",
+      "blobId": "d34ff79ef4f3c48658aa47044df30a88607ee304",
+      "size": 9424
+    },
+    {
+      "rfilename": "audio_tokenizer/config.json",
+      "blobId": "3f9e5ee43d2134dfdc1e38055fbcb24a18af1635",
+      "size": 2531
+    },
+    {
+      "rfilename": "audio_tokenizer/model.safetensors",
+      "blobId": "ba548d19a9aa2f62700a4a4d9a6ec66c72d84851",
+      "size": 805665628,
+      "lfs": {
+        "sha256": "fe7c5e8785e0a05833e1bfc3e002ec7f55af21e306b2e7154a448c1f54ccfb0d",
+        "size": 805665628,
+        "pointerSize": 134
+      }
+    },
+    {
+      "rfilename": "audio_tokenizer/preprocessor_config.json",
+      "blobId": "aa7431e986f9e13157c60e04be8f52501b718254",
+      "size": 206
+    },
+    {
+      "rfilename": "chat_template.jinja",
+      "blobId": "01be9b307daa2d425f7c168c9fb145a286e0afb4",
+      "size": 4168
+    },
+    {
+      "rfilename": "config.json",
+      "blobId": "dd518e816a5c4c8eba90820bb7efa49ceafbe223",
+      "size": 2238
+    },
+    {
+      "rfilename": "model.safetensors",
+      "blobId": "85aea9d89423206c45abfd24838f6ab226eafef8",
+      "size": 2450344112,
+      "lfs": {
+        "sha256": "730839316de585f4c8298ec0e1712efc10fb19c6fa4e36eb741cb8d51ebcf6aa",
+        "size": 2450344112,
+        "pointerSize": 135
+      }
+    },
+    {
+      "rfilename": "tokenizer.json",
+      "blobId": "4bd3453b51a69da3095ad7f5d41c6492bfa8b161",
+      "size": 11423986,
+      "lfs": {
+        "sha256": "408f669b7e2b045fdf54201d815bd364e6667dbd845115da81239c40bc6dcfd1",
+        "size": 11423986,
+        "pointerSize": 133
+      }
+    },
+    {
+      "rfilename": "tokenizer_config.json",
+      "blobId": "a7fb6f8558cce2a23d4cbb186a4a740bd2d9d481",
+      "size": 533
+    }
+  ],
+  "downloaded_at": "2026-10-21T04:42:53Z"
+}

@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "checks": [
+    "Native inference rejects missing API key",
+    "Only the exact assigned loopback endpoint is allowed",
+    "Native child exits and loopback allowance is revoked on close"
+  ]
+}

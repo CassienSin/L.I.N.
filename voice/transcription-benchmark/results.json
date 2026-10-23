@@ -1,0 +1,57 @@
+{
+  "engine": "faster-whisper base.en",
+  "device": "cpu",
+  "compute_type": "int8",
+  "load_seconds": 0.342,
+  "runs": [
+    {
+      "source": "segment-1",
+      "text": "Good morning. I am ready when you are.",
+      "language": "en",
+      "audio_seconds": 2.68,
+      "transcription_seconds": 0.94,
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 2.52,
+          "text": "Good morning. I am ready when you are."
+        }
+      ],
+      "no_speech": false
+    },
+    {
+      "source": "segment-2",
+      "text": "You can pause my voice or interrupt me at any time.",
+      "language": "en",
+      "audio_seconds": 3.53,
+      "transcription_seconds": 1.199,
+      "segments": [
+        {
+          "start": 0.08,
+          "end": 3.08,
+          "text": "You can pause my voice or interrupt me at any time."
+        }
+      ],
+      "no_speech": false
+    },
+    {
+      "source": "segment-3",
+      "text": "The card follows what you hear, so we stay on the same page.",
+      "language": "en",
+      "audio_seconds": 3.84,
+      "transcription_seconds": 1.241,
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 4.0,
+          "text": "The card follows what you hear, so we stay on the same page."
+        }
+      ],
+      "no_speech": false
+    }
+  ],
+  "checks": [
+    "Silence returns no transcript",
+    "Malformed, oversized and overlong audio rejected"
+  ]
+}

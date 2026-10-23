@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "Authenticated local graph and exact saved fact inspection",
+    "Title and scope filters, keyboard selection, exact multi-passage inspection",
+    "Pan, zoom, fit and keyboard navigation",
+    "Disconnection removes note nodes and clears selected source; reconnect restores them",
+    "Selected note updates live and deleted source clears",
+    "Live memory correction, scope change and forgetting; responsive 390/320 layouts",
+    "Voice continues across workspace switches and global interruption works from the map",
+    "Workspace navigation, reduced-motion mode, no JavaScript errors or external requests"
+  ]
+}

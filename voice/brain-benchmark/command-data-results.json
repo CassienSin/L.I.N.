@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "Map built from notes, memories, tasks and events: 49 items, 104 connections, identical on rebuild; every connection has a reason with a line number where it comes from a note",
+    "Neighbourhoods: 8 named groups (Capstone, Classes, Journal, Tasks, People\u2026); 9 tasks, memories or topics joined the folder group they connect to; identical on rebuild",
+    "A note that reads like an instruction to Lin is flagged in the inspector, and building the map changes nothing",
+    "Completed tasks leave the map; the map rebuilds only when notes, memories, tasks or the calendar change",
+    "Map rebuild with every demo item plus 30 more notes: 13 ms",
+    "About you: seeded from what you told Lin, saved with revision checks and limits, survives reopening, and is given to the model as facts, not instructions",
+    "Follow-ups like \u201cmark the second one done\u201d resolve against the list Lin just showed; questions and out-of-range numbers are left alone",
+    "Demo data lives only in voice/demo; your own data folder is never opened in demo mode"
+  ]
+}

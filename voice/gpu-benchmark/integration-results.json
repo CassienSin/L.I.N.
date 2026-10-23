@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": [
+    "API authentication, Host and Origin checks, bounded text, malformed JSON, no arbitrary file serving",
+    "Session token removed from visible URL; voice becomes ready",
+    "Actual playback, paused clock, resume, mute, sentence change on audio completion",
+    "Fresh local English generation streams sentence by sentence and completes",
+    "Cancellation discards unfinished audio; concurrent generation is rejected",
+    "Reduced motion and Escape interruption",
+    "Responsive layout at 1280, 780, 390, 320 px",
+    "No page errors or external page requests"
+  ],
+  "timings": {
+    "saved_demo_first_play_ms": 114,
+    "new_english_first_play_ms": 3763
+  },
+  "device": "NVIDIA GeForce RTX 2050"
+}

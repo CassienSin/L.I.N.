@@ -1,0 +1,262 @@
+{
+  "date": "2026-10-22T08:37:24.307Z",
+  "test_calendar": true,
+  "matched": 11,
+  "total": 11,
+  "median_seconds": 0.186,
+  "rows": [
+    {
+      "request": "Am I free this afternoon?",
+      "expected": "free_time",
+      "chosen": "free_time",
+      "match": true,
+      "via": "rule",
+      "args": {
+        "day": "today",
+        "part": "afternoon"
+      },
+      "answer": "You're free this afternoon from 4:40 PM to 5:00 PM, 20 minutes with nothing booked. That is from your imported calendar.",
+      "verification": "exact",
+      "proposal": null,
+      "error": null,
+      "seconds": 0.014,
+      "generation_complete_seconds": 0.014,
+      "timings": null
+    },
+    {
+      "request": "What do I have on tomorrow?",
+      "expected": "agenda",
+      "chosen": "agenda",
+      "match": true,
+      "via": "rule",
+      "args": {
+        "day": "tomorrow"
+      },
+      "answer": "Tomorrow you have: Probe client call at 9:00 AM, then Probe team sync at 2:00 PM. That is from your imported calendar.",
+      "verification": "exact",
+      "proposal": null,
+      "error": null,
+      "seconds": 0.012,
+      "generation_complete_seconds": 0.012,
+      "timings": null
+    },
+    {
+      "request": "Which business tasks are still open?",
+      "expected": "tasks",
+      "chosen": "tasks",
+      "match": true,
+      "via": "rule",
+      "args": {
+        "scope": "business"
+      },
+      "answer": "You have no open business tasks right now.",
+      "verification": "exact",
+      "proposal": null,
+      "error": null,
+      "seconds": 0.013,
+      "generation_complete_seconds": 0.013,
+      "timings": null
+    },
+    {
+      "request": "What did I write about suppliers?",
+      "expected": "notes",
+      "chosen": "notes",
+      "match": true,
+      "via": "rule",
+      "args": {
+        "query": "suppliers"
+      },
+      "answer": "I could not find a matching note or saved memory for that.",
+      "verification": "exact",
+      "proposal": null,
+      "error": null,
+      "seconds": 0.012,
+      "generation_complete_seconds": 0.012,
+      "timings": null
+    },
+    {
+      "request": "What is in my focus plan?",
+      "expected": "plan",
+      "chosen": "plan",
+      "match": true,
+      "via": "rule",
+      "args": {},
+      "answer": "There are no open tasks in this view. Add a task when you are ready.",
+      "verification": "exact",
+      "proposal": null,
+      "error": null,
+      "seconds": 0.011,
+      "generation_complete_seconds": 0.011,
+      "timings": null
+    },
+    {
+      "request": "Please put buying printer ink on my to-do list",
+      "expected": "add_task",
+      "chosen": "add_task",
+      "match": true,
+      "via": "rule",
+      "args": {
+        "title": "buying printer ink"
+      },
+      "answer": "I've prepared this for you to approve: Add task “Buying printer ink”, personal, 25 min, normal priority. Nothing changes until you press Approve.",
+      "verification": null,
+      "proposal": "Add task “Buying printer ink” · personal · 25 min · normal priority",
+      "error": null,
+      "seconds": 0.186,
+      "generation_complete_seconds": 0.186,
+      "timings": null
+    },
+    {
+      "request": "The printer ink task is finished",
+      "expected": "complete_task",
+      "chosen": "complete_task",
+      "match": true,
+      "via": "model",
+      "args": {
+        "task": "printer ink"
+      },
+      "answer": "I could not find an open task matching that. Check Plan my day for the exact name.",
+      "verification": null,
+      "proposal": null,
+      "error": "I could not find an open task matching that. Check Plan my day for the exact name.",
+      "seconds": 1.979,
+      "generation_complete_seconds": 1.979,
+      "timings": {
+        "route": {
+          "prompt_tokens": 15,
+          "prompt_ms": 419,
+          "generated_tokens": 12,
+          "generation_ms": 1464,
+          "cached_tokens": 379
+        }
+      }
+    },
+    {
+      "request": "Should I go to the gym this afternoon?",
+      "expected": "free_time",
+      "chosen": "free_time",
+      "match": true,
+      "via": "model",
+      "args": {
+        "day": "today",
+        "part": "afternoon"
+      },
+      "answer": "This comes from an imported calendar snapshot. You have 20 minutes free from 4:40 PM to 5:00 PM this afternoon. You can go to the gym during that time if you'd like.",
+      "verification": "passed",
+      "proposal": null,
+      "error": null,
+      "seconds": 6.52,
+      "generation_complete_seconds": 12.496,
+      "timings": {
+        "route": {
+          "prompt_tokens": 18,
+          "prompt_ms": 455,
+          "generated_tokens": 16,
+          "generation_ms": 1992,
+          "cached_tokens": 379
+        },
+        "answer": {
+          "first_sentence_ms": 3974,
+          "prompt_tokens": 143,
+          "prompt_ms": 2854,
+          "generated_tokens": 47,
+          "generation_ms": 7108,
+          "cached_tokens": 596,
+          "total_ms": 9967
+        }
+      }
+    },
+    {
+      "request": "Is tomorrow morning a good time for a client call?",
+      "expected": "free_time",
+      "chosen": "free_time",
+      "match": true,
+      "via": "model",
+      "args": {
+        "day": "tomorrow",
+        "part": "morning"
+      },
+      "answer": "Tomorrow morning is a good time for a client call. The block from 9:00 AM to 10:00 AM is marked as busy for a Probe client call. This information comes from an imported calendar snapshot.",
+      "verification": "passed",
+      "proposal": null,
+      "error": null,
+      "seconds": 7.672,
+      "generation_complete_seconds": 13.488,
+      "timings": {
+        "route": {
+          "prompt_tokens": 20,
+          "prompt_ms": 486,
+          "generated_tokens": 17,
+          "generation_ms": 2134,
+          "cached_tokens": 379
+        },
+        "answer": {
+          "first_sentence_ms": 5029,
+          "prompt_tokens": 181,
+          "prompt_ms": 3447,
+          "generated_tokens": 48,
+          "generation_ms": 7343,
+          "cached_tokens": 596,
+          "total_ms": 10795
+        }
+      }
+    },
+    {
+      "request": "Write a two line thank you message for a client",
+      "expected": "none",
+      "chosen": "none",
+      "match": true,
+      "via": "chat",
+      "args": null,
+      "answer": "Thank you for your trust and partnership. We're committed to exceeding your expectations and delivering results that matter.",
+      "verification": null,
+      "proposal": null,
+      "error": null,
+      "seconds": 1.74,
+      "generation_complete_seconds": 3.682,
+      "timings": {
+        "answer": {
+          "first_sentence_ms": 1627,
+          "prompt_tokens": 19,
+          "prompt_ms": 522,
+          "generated_tokens": 22,
+          "generation_ms": 3119,
+          "cached_tokens": 596,
+          "total_ms": 3646
+        }
+      }
+    },
+    {
+      "request": "Give me one tip for staying focused today",
+      "expected": "none",
+      "chosen": "none",
+      "match": true,
+      "via": "chat",
+      "args": null,
+      "answer": "Focus on one task at a time. Start with the most important thing first, then move to the next. Keep your environment calm and minimize distractions.",
+      "verification": null,
+      "proposal": null,
+      "error": null,
+      "seconds": 2.722,
+      "generation_complete_seconds": 6.101,
+      "timings": {
+        "route": {
+          "prompt_tokens": 17,
+          "prompt_ms": 429,
+          "generated_tokens": 6,
+          "generation_ms": 674,
+          "cached_tokens": 379
+        },
+        "answer": {
+          "first_sentence_ms": 1589,
+          "prompt_tokens": 17,
+          "prompt_ms": 481,
+          "generated_tokens": 31,
+          "generation_ms": 4482,
+          "cached_tokens": 596,
+          "total_ms": 4967
+        }
+      }
+    }
+  ]
+}

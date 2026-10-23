@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "Tools sheet adds the test server, shows it connected with 3 tools, all set to Ask first",
+    "“Use the lin test tools to add 2 and 3” becomes an approval card with the exact arguments; approving runs it and Lin reports “5”",
+    "A tool set to Auto runs without a card; the answer shows the tool output (“4 words”) as a connected-tool card",
+    "With every tool set to Off, the same request gets an ordinary answer and no tool runs",
+    "Tools sheet fits 390/320 px; no page errors or outside requests"
+  ],
+  "date": "2026-10-23T08:38:58.725Z"
+}

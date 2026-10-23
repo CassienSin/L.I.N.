@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "Plain answers stream: first sentence voiced 0.25 s after the request, 0.50 s before generation finished; order and history preserved",
+    "Tool answers verify each sentence before it is voiced; an unverified sentence stops generation and is never spoken",
+    "When the first sentence fails verification, the exact checked summary is spoken instead",
+    "When the needed source is missing, Lin states that plainly instead of letting the model guess",
+    "Interrupting during a streamed answer stops generation and speech; the partial answer is not saved to chat history",
+    "Streaming keeps the eight-sentence bound per spoken response"
+  ]
+}

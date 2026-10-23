@@ -1,0 +1,66 @@
+{
+  "Qwen3.6-35B-A3B-UD-Q3_K_XL.gguf": [
+    {
+      "threads": 4,
+      "test": "prompt",
+      "tokens_per_second": 24.58
+    },
+    {
+      "threads": 4,
+      "test": "write",
+      "tokens_per_second": 5.52
+    },
+    {
+      "threads": 6,
+      "test": "prompt",
+      "tokens_per_second": 33.83
+    },
+    {
+      "threads": 6,
+      "test": "write",
+      "tokens_per_second": 5.85
+    },
+    {
+      "threads": 8,
+      "test": "prompt",
+      "tokens_per_second": 40.42
+    },
+    {
+      "threads": 8,
+      "test": "write",
+      "tokens_per_second": 6.72
+    }
+  ],
+  "Qwen3-4B-Q4_K_M.gguf": [
+    {
+      "threads": 4,
+      "test": "prompt",
+      "tokens_per_second": 62.62
+    },
+    {
+      "threads": 4,
+      "test": "write",
+      "tokens_per_second": 8.75
+    },
+    {
+      "threads": 6,
+      "test": "prompt",
+      "tokens_per_second": 66.55
+    },
+    {
+      "threads": 6,
+      "test": "write",
+      "tokens_per_second": 8.96
+    },
+    {
+      "threads": 8,
+      "test": "prompt",
+      "tokens_per_second": 68.39
+    },
+    {
+      "threads": 8,
+      "test": "write",
+      "tokens_per_second": 8.16
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "Remember this prepares a review; only Save persists; authentication and fixed folder action validated",
+    "Local model uses saved fact with voice; correction keeps history and invalidates recent context",
+    "Exact file/line evidence, disconnect without deletion, and immediate changed-file lookup",
+    "Brain and memory interface fits desktop and small screens",
+    "Actual restart recalls the corrected fact; Forget removes fact/history; deleted test file stops matching"
+  ],
+  "corrected_answer": "The LinTestf1eb930c project color is amber."
+}

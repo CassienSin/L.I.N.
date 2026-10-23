@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "checks": [
+    "Starts a stdio MCP server, completes the handshake and lists its tools; new tools default to Ask first",
+    "Calls tools and returns their text; tool errors surface as errors, not answers",
+    "Only requests that match a connected tool are offered to it; ordinary chat and built-in questions are not",
+    "Model-written arguments are checked against the tool schema; schemas are reduced to a bounded, grammar-safe subset",
+    "A tool call becomes an approval card; nothing runs before approval, it runs exactly once after, and the receipt keeps the output",
+    "Off hides a tool from Lin and refuses it even if asked directly; stale Tools edits are refused",
+    "Server settings are validated: names, command, argument and environment limits, working folder",
+    "A tool description that tries to instruct Lin is flagged and never shown to the model; huge results are cut to a bounded size",
+    "A server that crashes mid-call or cannot start reports a clear error within seconds instead of hanging Lin",
+    "Tools settings survive restarting Lin; removing a server forgets it"
+  ]
+}

@@ -1,0 +1,10 @@
+.venv-voice/
+.cache/
+voice/models/
+voice/__pycache__/
+voice/runtime/
+voice/data/
+Lin Brain/*
+!Lin Brain/START-HERE.md
+voice/demo/
+tools/

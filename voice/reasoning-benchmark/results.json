@@ -1,0 +1,26 @@
+{
+  "load_seconds": 3.857,
+  "runs": [
+    {
+      "prompt": "Hello Lin. What can you help me with today?",
+      "answer": "Hi there! I'm here to help with any questions or tasks you have. Whether it's planning, discussing information, or needing a quick reminder, just let me know how I can assist you today!",
+      "seconds": 8.864
+    },
+    {
+      "prompt": "I have 30 minutes to prepare a client proposal and tidy my desk. Help me choose what to do first.",
+      "answer": "You have 30 minutes to prepare a client proposal and tidy your desk. Which task do you need help with first?",
+      "seconds": 3.63
+    },
+    {
+      "prompt": "Please check my calendar and tell me my next meeting.",
+      "answer": "I can't check your calendar because I don't have access to your personal information or calendar data. Would you like me to help you find your next meeting another way?",
+      "seconds": 4.581
+    },
+    {
+      "prompt": "Session recall",
+      "answer": "Your example project is called Lantern.",
+      "seconds": 1.916
+    }
+  ],
+  "outbound_guard": "passed"
+}

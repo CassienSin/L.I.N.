@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "checks": [
+    "New-query citations survive the matching revision update",
+    "Later file edits clear stale cards and replay",
+    "Next search uses the changed passage"
+  ]
+}

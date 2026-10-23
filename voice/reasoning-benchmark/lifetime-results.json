@@ -1,0 +1,4 @@
+{
+  "passed": true,
+  "check": "Windows job closes the child when its owner exits abruptly"
+}

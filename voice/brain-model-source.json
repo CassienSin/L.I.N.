@@ -1,0 +1,9 @@
+{
+  "file": "Qwen3.6-35B-A3B-UD-Q3_K_XL.gguf",
+  "url": "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/a483e9e6cbd595906af30beda3187c2663a1118c/Qwen3.6-35B-A3B-UD-Q3_K_XL.gguf",
+  "sha256": "a832b9689925f1bd335bbe985cdfb06c36bf2cf268f4f8f6eceafa3ceb515617",
+  "bytes": 16845511648,
+  "license": "Apache-2.0 (Qwen3.6)",
+  "repo": "unsloth/Qwen3.6-35B-A3B-GGUF",
+  "commit": "a483e9e6cbd595906af30beda3187c2663a1118c"
+}

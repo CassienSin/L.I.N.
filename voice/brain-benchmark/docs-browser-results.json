@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "Dropped a PDF, a PowerPoint and a locked PDF into Lin Brain: read in the background in 11 s, the locked one explained",
+    "The Notes panel shows how many documents were read and why one could not be",
+    "“When is the next review in the harbor report?” read that PDF and answered from page 3: “The next review is in January, as stated on page 3 of the harbor-report.pdf.”",
+    "Google Docs, Drive & Sheets preset: read-only, and it will not start until your own client ID, secret and address are filled in"
+  ],
+  "date": "2026-10-23T08:30:35.727Z"
+}

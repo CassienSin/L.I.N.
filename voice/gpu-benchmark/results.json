@@ -1,0 +1,89 @@
+{
+  "device": "NVIDIA GeForce RTX 2050",
+  "dtype": "torch.bfloat16",
+  "torch": "2.8.0+cu126",
+  "load_and_reference_seconds": 6.067,
+  "network": "Offline libraries, local model paths, outbound Python sockets blocked",
+  "sample_rate": 24000,
+  "runs": [
+    {
+      "name": "gpu-design-32",
+      "text": "Good morning. Your plan is ready. Let's start with the most important task.",
+      "file": "gpu-design-32.wav",
+      "generation_seconds": 2.658,
+      "audio_seconds": 4.83,
+      "realtime_factor": 0.55,
+      "peak_allocated_mb": 2009.9,
+      "steps": 32,
+      "seed": 42,
+      "language": "en",
+      "mode": "voice_design"
+    },
+    {
+      "name": "gpu-reference-32",
+      "text": "Good morning. Your plan is ready. Let's start with the most important task.",
+      "file": "gpu-reference-32.wav",
+      "generation_seconds": 3.788,
+      "audio_seconds": 5.16,
+      "realtime_factor": 0.734,
+      "peak_allocated_mb": 2043.8,
+      "steps": 32,
+      "seed": 42,
+      "language": "en",
+      "mode": "synthetic_A_reference"
+    },
+    {
+      "name": "gpu-reference-16",
+      "text": "Good morning. Your plan is ready. Let's start with the most important task.",
+      "file": "gpu-reference-16.wav",
+      "generation_seconds": 1.931,
+      "audio_seconds": 5.17,
+      "realtime_factor": 0.374,
+      "peak_allocated_mb": 2043.8,
+      "steps": 16,
+      "seed": 42,
+      "language": "en",
+      "mode": "synthetic_A_reference"
+    },
+    {
+      "name": "segment-1",
+      "text": "Good morning. I am ready when you are.",
+      "file": "segment-1.wav",
+      "generation_seconds": 2.868,
+      "audio_seconds": 2.68,
+      "realtime_factor": 1.07,
+      "peak_allocated_mb": 2018.3,
+      "steps": 32,
+      "seed": 42,
+      "language": "en",
+      "mode": "synthetic_A_reference"
+    },
+    {
+      "name": "segment-2",
+      "text": "You can pause my voice, or interrupt me at any time.",
+      "file": "segment-2.wav",
+      "generation_seconds": 3.055,
+      "audio_seconds": 3.53,
+      "realtime_factor": 0.865,
+      "peak_allocated_mb": 2027.7,
+      "steps": 32,
+      "seed": 42,
+      "language": "en",
+      "mode": "synthetic_A_reference"
+    },
+    {
+      "name": "segment-3",
+      "text": "The card follows what you hear, so we stay on the same page.",
+      "file": "segment-3.wav",
+      "generation_seconds": 3.552,
+      "audio_seconds": 3.84,
+      "realtime_factor": 0.925,
+      "peak_allocated_mb": 2035.3,
+      "steps": 32,
+      "seed": 42,
+      "language": "en",
+      "mode": "synthetic_A_reference"
+    }
+  ],
+  "quality_review": "Not evaluated; reduced steps and reference transfer need listening review"
+}

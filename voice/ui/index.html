@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lin</title>
+<link rel="stylesheet" href="/tidepool.css">
+<link rel="stylesheet" href="/planner.css">
+<link rel="stylesheet" href="/today.css">
+<link rel="stylesheet" href="/actions.css">
+<script src="/app.js" defer></script>
+<script src="/microphone.js" defer></script>
+<script src="/brain.js" defer></script>
+<script src="/graph.js" defer></script>
+<script src="/command.js" defer></script>
+<script src="/planner.js" defer></script>
+<script src="/today.js" defer></script>
+<script src="/actions.js" defer></script>
+<script src="/tools.js" defer></script>
+<script src="/work.js" defer></script>
+</head>
+<body data-state="ready">
+<main id="lin-voice">
+ <canvas id="map-canvas" tabindex="0" aria-label="Map of everything Lin knows. Drag to move, scroll to zoom, select an item to inspect it, Shift and select a second item to trace a path. A list of items is in the inspector."></canvas>
+ <div id="map-pulse-note" class="visually-hidden" role="status"></div>
+
+ <header class="topbar">
+  <div class="brandline"><span class="wordmark">Lin</span><span id="demo-badge" class="demo-badge" hidden>Demo data</span></div>
+  <div id="day-ribbon" class="day-ribbon" role="img" aria-label="Loading today’s calendar"><div class="ribbon-track"></div><div id="ribbon-items"></div><div id="ribbon-now" class="ribbon-now" hidden></div><div id="ribbon-hours" class="ribbon-hours"></div><button id="ribbon-label" class="ribbon-label" type="button">Loading today…</button></div>
+  <div class="status-chips"><span class="chip"><span class="dot live"></span>On this computer</span><span id="voice-chip" class="chip">Starting…</span></div>
+ </header>
+
+ <aside id="inspector" class="float-panel inspector" aria-label="Inspector">
+  <label class="field-label" for="map-search">Find anything</label>
+  <input id="map-search" type="search" placeholder="A person, a note, a date…" maxlength="120" autocomplete="off">
+  <div id="inspector-empty">
+   <h2 class="panel-title">Most connected</h2>
+   <div id="hub-list" class="hub-list"></div>
+   <div id="cluster-section" hidden><h2 class="panel-title">Neighbourhoods</h2><div id="cluster-list" class="hub-list"></div></div>
+   <p class="hint">Select anything on the map to see what Lin knows about it. Shift and select a second item to trace how they connect.</p>
+  </div>
+  <div id="inspector-focus" hidden>
+   <div class="kind-line"><span id="focus-dot" class="kind-dot"></span><span id="focus-kind"></span></div>
+   <h2 id="focus-title" class="focus-title"></h2>
+   <p id="focus-detail" class="focus-detail"></p>
+   <p id="focus-flag" class="focus-flag" hidden>This note contains text that reads like an instruction to Lin. She treats it as plain text and never follows it.</p>
+   <p id="focus-text" class="focus-text"></p>
+   <h3 id="focus-links-title" class="panel-sub"></h3>
+   <div id="focus-links" class="focus-links"></div>
+   <div class="inspector-actions"><button id="focus-open" type="button">Open source</button><button id="focus-ask" type="button">Ask Lin about this</button><button id="focus-clear" type="button" aria-label="Close inspector">Close</button></div>
+  </div>
+  <details class="map-list-panel"><summary>Browse as a list</summary><div id="map-list" class="map-list"></div></details>
+ </aside>
+
+ <aside id="lens" class="float-panel lens" aria-label="Map lens">
+  <h2 class="panel-sub">Show</h2>
+  <div id="kind-filters" class="filter-list"></div>
+  <h2 class="panel-sub">Connections</h2>
+  <div id="edge-filters" class="filter-list"></div>
+  <div class="segmented" role="group" aria-label="View"><button id="view-2d" type="button" aria-pressed="true">2D</button><button id="view-3d" type="button" aria-pressed="false">3D</button><button id="map-fit" type="button">Fit</button></div>
+  <details class="forces"><summary>Forces</summary>
+   <label class="slider">Spread <input id="force-repel" type="range" min="20" max="240" value="120"></label>
+   <label class="slider">Link length <input id="force-link" type="range" min="30" max="220" value="100"></label>
+  </details>
+  <p id="map-status" class="hint" role="status">Loading your map…</p>
+  <button id="lens-close" class="lens-close" type="button">Done</button>
+ </aside>
+
+ <aside id="work-panel" class="work-panel" hidden aria-live="polite" aria-label="What Lin is doing"><div class="work-head"><span id="work-title">Working on it</span><button id="work-close" type="button" aria-label="Hide the steps">×</button></div><ol id="work-steps"></ol></aside>
+ <section class="conversation" aria-label="Conversation with Lin">
+  <div id="caption" class="caption">
+   <div class="caption-head"><p id="request-echo" hidden></p><button id="caption-hide" class="caption-hide" type="button" aria-expanded="true">Hide</button></div>
+   <div id="caption-body" class="caption-body">
+    <ol id="sentences"><li class="placeholder">Ask me anything, or press the microphone and just talk.</li></ol>
+    <section id="answer-sources" aria-label="Sources" hidden></section>
+    <section id="answer-actions" aria-label="Checked sources and proposed changes" hidden></section>
+    <div class="playback"><button id="pause" type="button" disabled>Pause</button><button id="stop" type="button" disabled>Interrupt</button><button id="replay" type="button" disabled>Replay</button><button id="save-answer" type="button" disabled title="Turn this answer into a note in Lin Brain">Save to brain</button><span id="source-label" class="source-label">Nothing playing</span></div>
+    <div class="progress-row"><progress id="progress" max="1" value="0" aria-label="Current sentence playback"></progress><span id="clock">0:00 / 0:00</span></div>
+    <p id="detail" class="detail" role="status">Sentence highlights follow her voice.</p>
+   </div>
+  </div>
+  <div class="dock">
+   <div id="orb" class="pearl" role="img" aria-label="Lin"><span class="pearl-ring r2"></span><span class="pearl-ring r1"></span><span class="pearl-arc"></span><span class="pearl-core"></span><span class="mic-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div>
+   <span id="voice-state" class="visually-hidden" role="status">READY WHEN YOU ARE</span>
+   <form id="ask-form" class="ask-form">
+    <label class="visually-hidden" for="request-input">Ask Lin</label>
+    <input id="request-input" maxlength="1000" placeholder="Ask Lin…" autocomplete="off" required>
+    <span id="request-count" class="visually-hidden">0 / 1000</span>
+    <label class="visually-hidden" for="request-mode">Answer from</label>
+    <select id="request-mode" class="mode-select" title="How Lin answers"><option value="chat">Lin</option><option value="brain">Exact notes</option></select>
+    <button id="ask" class="send" type="submit" aria-label="Send to Lin" disabled><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"></path></svg></button>
+   </form>
+   <div class="dock-buttons">
+    <button id="record" class="round talk" type="button" aria-label="Talk hands-free" aria-pressed="false" disabled><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></button>
+    <label class="round mute" title="Mute Lin"><input id="mute" type="checkbox"><span class="visually-hidden">Mute Lin</span><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path class="sound" d="M17 9.5a3.5 3.5 0 0 1 0 5"></path><path class="cross" d="M16 9l5 6M21 9l-5 6"></path></svg></label>
+    <button id="view-today" class="round" type="button" aria-label="Today" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M5 19l1.4-1.4M17.6 6.4 19 5"></path></svg></button>
+    <button id="view-planner" class="round" type="button" aria-label="Plan my day" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"></path><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"></path></svg></button>
+    <button id="view-brain" class="round" type="button" aria-label="Notes and memory" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg></button>
+    <button id="view-activity" class="round" type="button" aria-label="Activity" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>
+    <button id="view-tools" class="round" type="button" aria-label="Tools" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0z"></path><path d="M12 16v5"></path></svg></button>
+    <button id="view-settings" class="round" type="button" aria-label="About you and settings" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></button>
+    <button id="lens-open" class="round lens-open" type="button" aria-label="Map filters"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"></path></svg></button>
+   </div>
+  </div>
+  <p id="mic-status" class="mic-status" role="status">Loading local English recognition…</p>
+ </section>
+
+ <div id="sheet-scrim" class="sheet-scrim" hidden></div>
+ <div id="sheet" class="sheet" hidden role="dialog" aria-modal="false" aria-labelledby="sheet-title">
+  <div class="sheet-head"><h1 id="sheet-title" class="sheet-title">Lin</h1><button id="view-chat" type="button" aria-pressed="true">Back to the map</button></div>
+  <div class="sheet-body">
+
+ <section id="brain-workspace" class="brain-workspace" hidden aria-label="Notes and memory">
+  <section class="panel folder-panel"><h2>Your notes and documents</h2><p>Put notes and documents in your Lin Brain folder: text and Markdown, PDF (scanned pages too), Word, PowerPoint, Excel, OpenDocument, RTF, web pages, e-books, Outlook messages and photos of text. Lin reads them on this PC, and search returns the exact matching passages with their page, slide or sheet.</p><p id="folder-path" class="path"></p><div class="brain-actions"><button id="open-brain-folder">Open folder</button><button id="refresh-brain">Refresh notes</button><button id="connect-brain">Disconnect folder</button><button id="search-brain">Search my notes</button></div><p id="brain-status" role="status">Loading local notes…</p><ul id="brain-problems" class="brain-problems" hidden></ul><p class="small-note">Up to 1,000 files: text notes up to 256 KB, documents up to 64 MB. New and changed documents are read in the background, and never while Lin is answering. Linked folders and Office lock files are skipped. Write [[Name]] in a note to link it on the map.</p></section>
+  <section class="panel memory-editor"><h2>Remember this</h2><p>Saved facts survive closing Lin. Correct or forget them whenever you need.</p><form id="memory-form"><label for="memory-title">Title</label><input id="memory-title" maxlength="80" required placeholder="For example: Defense room"><label for="memory-scope">Scope</label><select id="memory-scope"><option value="personal">Personal</option><option value="business">School and work</option></select><label for="memory-fact">Fact to remember</label><textarea id="memory-fact" maxlength="500" rows="3" required placeholder="Write one clear fact or preference…"></textarea><div class="brain-actions"><button id="save-memory" class="primary" type="submit">Save memory</button><button id="cancel-memory-edit" type="button" hidden>Cancel edit</button></div></form><p id="memory-status" role="status">Nothing is saved from a conversation automatically.</p></section>
+  <section class="panel memory-library"><div class="library-heading"><h2>Saved memories</h2><button id="reload-memories">Refresh list</button></div><p class="small-note">Clear conversation removes recent chat. Forget removes a lasting fact and its edit history.</p><div id="memory-list"></div></section>
+ </section>
+
+ <section id="planner-workspace" hidden aria-label="Plan my day">
+  <div class="planner-layout">
+   <section class="panel task-editor"><h2 id="task-editor-title">Add a task</h2><form id="task-form"><label for="task-title">What needs doing?</label><input id="task-title" maxlength="80" required placeholder="For example: Finish defense slides"><div class="task-fields"><div><label for="task-scope">Scope</label><select id="task-scope"><option value="personal">Personal</option><option value="business">School and work</option></select></div><div><label for="task-priority">Priority</label><select id="task-priority"><option value="1">High</option><option value="2" selected>Normal</option><option value="3">Low</option></select></div></div><label for="task-minutes">Estimated minutes</label><input id="task-minutes" type="number" min="1" max="480" step="1" value="25" required><div class="brain-actions"><button id="save-task" type="submit" class="primary">Add task</button><button id="cancel-task" type="button" hidden>Cancel edit</button></div></form><p class="small-note">Tasks stay until you remove them. Done tasks leave the plan and can be reopened.</p></section>
+   <section class="panel focus-panel"><h2>Build a focus plan</h2><form id="plan-form"><div class="task-fields"><div><label for="plan-minutes">Available minutes</label><input id="plan-minutes" type="number" min="5" max="480" step="1" value="60" required></div><div><label for="plan-break">Break between tasks</label><select id="plan-break"><option value="0">No break</option><option value="5" selected>5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select></div></div><label for="plan-scope">Include</label><select id="plan-scope"><option value="all">Everything</option><option value="personal">Personal only</option><option value="business">School and work only</option></select><div class="brain-actions"><button id="build-plan" type="submit" class="primary">Build my plan</button><button id="read-plan" type="button" disabled>Hear my plan</button></div></form><p id="plan-settings-note" class="small-note">Breaks count toward your available time.</p><p class="small-note">This uses your task estimates, not your calendar. Times below are minutes from the start of your focus session.</p></section>
+   <section class="panel plan-result"><div class="library-heading"><h2>Your focus plan</h2><span id="plan-total" class="local-badge">Loading…</span></div><p id="plan-rule" class="small-note">High priority first, then oldest added. Whole tasks only; tasks that do not fit stay below.</p><ol id="plan-steps"></ol><p id="plan-free"></p><div id="plan-deferred"></div></section>
+   <section class="panel task-library"><div class="library-heading"><h2>Your tasks</h2><button id="refresh-tasks">Refresh</button></div><p id="planner-status" role="status">Loading your tasks…</p><div id="task-list"></div></section>
+  </div>
+ </section>
+
+ <section id="today-workspace" hidden aria-label="Today">
+  <div class="today-heading"><div><p id="today-date">Manila time</p></div><div class="brain-actions"><button id="refresh-today">Refresh</button><button id="hear-today" class="primary" disabled>Hear my briefing</button></div></div>
+  <section class="panel briefing-summary"><p id="today-summary">Loading your briefing…</p><p class="small-note">From your imported calendar and saved tasks. Your inbox is not connected. Focus plans are not fitted between events.</p></section>
+  <div class="today-layout">
+   <section class="panel agenda-panel"><div class="library-heading"><h2>Today’s calendar</h2><span id="today-event-count" class="local-badge">NO IMPORT</span></div><p id="today-source" class="small-note"></p><p id="today-warning" role="status"></p><div id="today-events"></div></section>
+   <section class="panel today-tasks"><h2>Your open tasks</h2><p id="today-task-count"></p><div id="today-task-list"></div><p id="today-plan" class="small-note"></p><button id="today-open-plan">Open Plan my day</button></section>
+   <section class="panel calendar-import"><h2>Import a calendar</h2><p>Export an .ics file from Google Calendar or Outlook, preview it, then save a local copy of its events.</p><label for="calendar-file">Calendar export, .ics, up to 256 KB</label><input id="calendar-file" type="file" accept=".ics,text/calendar"><div class="brain-actions"><button id="preview-calendar">Preview file</button><button id="forget-calendar" disabled>Remove saved calendar</button></div><p id="calendar-status" role="status">Your calendar app and the original file are never changed.</p><p class="small-note">One imported calendar at a time, 30 days from import, up to 200 event definitions. No live sync yet. Times without a time zone use Asia/Manila.</p>
+    <section id="calendar-preview" hidden aria-label="Calendar import preview"><h3>Review before saving</h3><p id="preview-description"></p><div id="preview-events"></div><div class="brain-actions"><button id="save-calendar" class="primary">Save this calendar</button><button id="cancel-calendar">Discard preview</button></div><p class="small-note">Nothing is saved until you choose Save. The preview expires after 10 minutes and replaces the previous import.</p></section>
+   </section>
+  </div>
+ </section>
+
+ <section id="activity-workspace" hidden aria-label="Activity">
+  <section class="panel activity-panel"><p class="activity-lead">Every change Lin prepares waits for your approval, and every decision leaves a receipt here.</p><div class="library-heading"><p id="activity-status" role="status">Loading activity…</p><button id="refresh-activity">Refresh</button></div><div id="activity-list"></div><p class="small-note">Lin can read your tasks, calendar, focus plan and notes to answer. She can prepare two changes: adding a task and marking one done. Proposals expire after 10 minutes. A change can be undone here if the task was not edited since.</p></section>
+ </section>
+
+ <section id="tools-workspace" hidden aria-label="Tools">
+  <div class="tools-layout">
+   <section class="panel"><h2>Connected tools</h2><p>Connect MCP servers and Lin can use their tools when you ask. Lin asks before every tool call unless you set that tool to Auto. Off hides a tool from Lin completely.</p><p class="small-note">A server is a program that runs on this PC with your permissions, and it may use the internet. Tool descriptions and results are treated as data, never as instructions. Only add servers you trust.</p></section>
+   <section class="panel"><div class="library-heading"><h2>Servers</h2><p id="tools-status" role="status">Loading tools…</p></div><div id="tools-list"></div></section>
+   <section class="panel"><h2>Add a server</h2><form id="tool-form"><label for="tool-name">Name</label><input id="tool-name" maxlength="32" required placeholder="for example: rea"><label for="tool-command">Command</label><input id="tool-command" maxlength="260" required placeholder="for example: npx"><label for="tool-args">Arguments, one per line</label><textarea id="tool-args" rows="3" placeholder="-y&#10;some-mcp-server"></textarea><label for="tool-env">Environment, one NAME=value per line (optional)</label><textarea id="tool-env" rows="2"></textarea><label for="tool-cwd">Working folder (optional)</label><input id="tool-cwd" maxlength="260"><div class="brain-actions"><button class="primary" type="submit">Add and start</button><button id="tool-preset" type="button">Fill in Lin test tools</button><button id="tool-preset-google" type="button">Fill in Google Docs, Drive &amp; Sheets</button></div></form><p id="tool-form-status" class="small-note" role="status"></p></section>
+  </div>
+ </section>
+
+ <section id="settings-workspace" hidden aria-label="About you and settings">
+  <div class="settings-grid">
+   <section class="panel"><h2>About you</h2><p>Lin reads this before every answer. It stays on this computer.</p><form id="profile-form"><label for="profile-name">What Lin calls you</label><input id="profile-name" maxlength="40" required><label for="profile-about">About you</label><textarea id="profile-about" maxlength="600" rows="5" required></textarea><label for="profile-tone">How Lin should talk to you</label><textarea id="profile-tone" maxlength="300" rows="3" required></textarea><div class="brain-actions"><button id="profile-save" class="primary" type="submit">Save profile</button></div></form><p id="profile-status" role="status"></p></section>
+   <section class="panel"><h2>Brain</h2><p>Lin always thinks on this computer. Choose which brain she uses.</p>
+    <div class="brain-choice" role="radiogroup" aria-label="Brain">
+     <label class="check-row"><input type="radio" name="brain-mode" value="fast"> <span><strong>Fast</strong> · Qwen3 4B on the processor</span></label>
+     <label class="check-row"><input type="radio" name="brain-mode" value="smart"> <span><strong>Smart</strong> · Qwen3.6 35B, also uses the graphics card</span></label>
+    </div>
+    <p id="brain-note" class="small-note"></p>
+    <p class="small-note">Measured on this laptop: written answers start speaking in about 6–8 seconds with either brain. With Smart, simple answers such as “what tasks are left?” take about 5–8 seconds instead of 2, because the voice shares the 4 GB graphics card.</p>
+    <p id="brain-state" class="small-note" role="status"></p></section>
+   <section class="panel"><h2>Talking hands-free</h2><p>Press the microphone once and talk. Lin sends your words after a short pause, stops listening while she speaks, and listens again when she’s done. Press it again, or Escape, to stop. Space interrupts her.</p><label class="check-row"><input id="mic-review" type="checkbox"> Let me review what Lin heard before sending</label><label class="slider">Pause before sending <output id="silence-value">0.7 s</output><input id="silence-ms" type="range" min="500" max="2000" step="100" value="700"></label><p id="mic-timer" class="small-note">Up to 30 seconds per turn.</p><div id="mic-recovery" hidden><p>Your browser or Windows may be blocking the microphone. Open Lin in your regular browser and allow the microphone when asked.</p><button id="open-browser" type="button">Open Lin in browser</button><p>If it is still blocked, check the site’s microphone permission and Windows microphone privacy settings.</p></div><button id="discard" type="button" hidden>Discard recording</button><div id="transcript-panel" hidden><label for="transcript">What Lin heard</label><textarea id="transcript" rows="2" maxlength="2000"></textarea><button id="use-transcript" type="button">Use as my request</button></div><p class="small-note">Microphone: <span id="mic-indicator">off</span>. Speech is transcribed on this computer.</p></section>
+   <section class="panel"><h2>Conversation</h2><p id="context-state">Recent chat stays in this session. Save lasting facts in Memory.</p><label class="check-row"><input id="greet-voice" type="checkbox" checked> Greet me out loud when Lin opens</label><button id="clear-context" type="button">Clear conversation</button><p id="reasoning-state" class="small-note" role="status">Loading local reasoning…</p><div class="engine-line"><span id="engine-dot"></span><span id="engine-state" role="status">Starting local voice…</span></div></section>
+   <section class="panel"><h2>Voice preview</h2><form id="speak-form"><label for="response-input">Write something for Lin to say</label><textarea id="response-input" maxlength="600" rows="3">Hi. I’m Lin. Let’s take this one step at a time.</textarea><p class="small-note"><span id="char-count">0 / 600</span></p><div class="brain-actions"><button id="generate" class="primary" type="submit" disabled>Speak with Lin</button><button id="demo" type="button" disabled>Play saved introduction</button></div></form><canvas id="waveform" width="480" height="64" aria-hidden="true"></canvas></section>
+   <section class="panel"><h2>Close Lin</h2><p>Unloading frees memory and the graphics card. Open Lin again with Open Lin.cmd.</p><button id="shutdown" type="button">Unload Lin and close session</button><p class="small-note">Personal evaluation · voice model licence is non-commercial.</p></section>
+  </div>
+ </section>
+
+  </div>
+ </div>
+ <dialog id="source-dialog"><button id="close-source" aria-label="Close details">Close</button><h2 id="source-title"></h2><p id="source-meta" class="path"></p><div id="source-content"></div></dialog>
+ <button id="interrupt-anywhere" class="visually-hidden" type="button" disabled>Interrupt Lin</button>
+</main>
+<audio id="audio" preload="auto"></audio>
+</body>
+</html>

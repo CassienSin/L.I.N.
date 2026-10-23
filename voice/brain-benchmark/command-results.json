@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "checks": [
+    "Map shows 54 items and 111 connections from /api/graph; every connection has a kind and a reason; demo badge visible",
+    "Inspector shows the focused item with a reason for every connection; Shift-click traced the shortest path (4 steps)",
+    "Kind filters hide exactly that kind; 3D view turns by dragging; 2D and Fit restore the overview",
+    "2,000 items, 3998 connections: physics plus drawing 27.6 ms per frame (median), 103.3 ms (95th)",
+    "Today, Plan my day, Notes and memory, Activity and About you open as sheets and close with Escape; Lin greets you by your profile name",
+    "Typed request: the dock clears, Lin’s words appear in the caption with the checked-sources card, and playback completes",
+    "Hands-free: one press, the pause ends the turn, the transcript is sent automatically, the mic is ignored while Lin answers, listening resumes, Escape turns it off",
+    "390 and 320 px: no sideways scroll, every dock button reachable; no page errors or outside requests"
+  ],
+  "metrics": {
+    "benchmark": {
+      "nodes": 2000,
+      "edges": 3998,
+      "median_ms": 27.6,
+      "p95_ms": 103.3
+    },
+    "handsfree_turn_seconds": 12.227
+  },
+  "demo": true,
+  "date": "2026-10-23T08:23:19.756Z"
+}

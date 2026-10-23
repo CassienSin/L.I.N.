@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "Authenticated explicit task entry; priority order, exact time and break accounting; oversized tasks remain visible",
+    "Corrections update the plan; done/reopen; stale writes and stale speech are rejected",
+    "Scope selection, unsaved settings prevent speech, responsive 390/320 layouts",
+    "Real spoken summary with playback highlights; voice continues in planner; changing tasks clears stale replay",
+    "Exact Plan my day request opens the saved planner without an invented model answer",
+    "No page errors or external requests",
+    "Actual service restart preserves tasks, edits, reopened state, plan preferences and exact plan",
+    "Temporary tasks removed and previous preferences restored"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "checks": [
+    "Authentication, MIME, size and malformed audio validation",
+    "No capture on load; fake microphone -> WebM -> local transcript -> edit -> actual voice read-back",
+    "Escape discards recording without transcription request and releases tracks",
+    "Discard during pending permission also closes the late-arriving stream",
+    "Hidden-page cancellation releases tracks and discards audio",
+    "Permission denial recovers to microphone off; responsive at four widths",
+    "No page errors or external requests; only synthetic microphone audio used"
+  ],
+  "timings": {
+    "finish_to_review_ms": 849
+  },
+  "recognized_text": "You can pause my voice or interrupt me at any time."
+}

@@ -1,0 +1,218 @@
+{
+  "date": "2026-10-22 18:53:23",
+  "reasoning": [
+    {
+      "threads": 4,
+      "prompt": 256,
+      "gen": 0,
+      "tokens_per_second": 34.61
+    },
+    {
+      "threads": 4,
+      "prompt": 0,
+      "gen": 64,
+      "tokens_per_second": 3.48
+    },
+    {
+      "threads": 6,
+      "prompt": 256,
+      "gen": 0,
+      "tokens_per_second": 39.9
+    },
+    {
+      "threads": 6,
+      "prompt": 0,
+      "gen": 64,
+      "tokens_per_second": 3.52
+    },
+    {
+      "threads": 8,
+      "prompt": 256,
+      "gen": 0,
+      "tokens_per_second": 40.33
+    },
+    {
+      "threads": 8,
+      "prompt": 0,
+      "gen": 64,
+      "tokens_per_second": 3.12
+    }
+  ],
+  "voice": [
+    {
+      "label": "32 idle",
+      "text": "short",
+      "steps": 32,
+      "cpu_busy": false,
+      "torch_threads": 6,
+      "generation_seconds": 5.791,
+      "audio_seconds": 2.4
+    },
+    {
+      "label": "32 idle",
+      "text": "medium",
+      "steps": 32,
+      "cpu_busy": false,
+      "torch_threads": 6,
+      "generation_seconds": 5.628,
+      "audio_seconds": 5.64
+    },
+    {
+      "label": "32 busy",
+      "text": "short",
+      "steps": 32,
+      "cpu_busy": true,
+      "torch_threads": 6,
+      "generation_seconds": 10.744,
+      "audio_seconds": 2.4
+    },
+    {
+      "label": "32 busy",
+      "text": "medium",
+      "steps": 32,
+      "cpu_busy": true,
+      "torch_threads": 6,
+      "generation_seconds": 10.689,
+      "audio_seconds": 5.64
+    },
+    {
+      "label": "32 busy t2",
+      "text": "short",
+      "steps": 32,
+      "cpu_busy": true,
+      "torch_threads": 2,
+      "generation_seconds": 10.963,
+      "audio_seconds": 2.4
+    },
+    {
+      "label": "32 busy t2",
+      "text": "medium",
+      "steps": 32,
+      "cpu_busy": true,
+      "torch_threads": 2,
+      "generation_seconds": 10.149,
+      "audio_seconds": 5.64
+    },
+    {
+      "label": "16 busy t2",
+      "text": "short",
+      "steps": 16,
+      "cpu_busy": true,
+      "torch_threads": 2,
+      "generation_seconds": 5.704,
+      "audio_seconds": 2.36
+    },
+    {
+      "label": "16 busy t2",
+      "text": "medium",
+      "steps": 16,
+      "cpu_busy": true,
+      "torch_threads": 2,
+      "generation_seconds": 5.633,
+      "audio_seconds": 4.94
+    },
+    {
+      "label": "12 busy t2",
+      "text": "short",
+      "steps": 12,
+      "cpu_busy": true,
+      "torch_threads": 2,
+      "generation_seconds": 4.136,
+      "audio_seconds": 2.36
+    },
+    {
+      "label": "12 busy t2",
+      "text": "medium",
+      "steps": 12,
+      "cpu_busy": true,
+      "torch_threads": 2,
+      "generation_seconds": 3.732,
+      "audio_seconds": 5.44
+    },
+    {
+      "label": "8 busy t2",
+      "text": "short",
+      "steps": 8,
+      "cpu_busy": true,
+      "torch_threads": 2,
+      "generation_seconds": 2.809,
+      "audio_seconds": 2.4
+    },
+    {
+      "label": "8 busy t2",
+      "text": "medium",
+      "steps": 8,
+      "cpu_busy": true,
+      "torch_threads": 2,
+      "generation_seconds": 2.794,
+      "audio_seconds": 5.53
+    },
+    {
+      "label": "16 idle t2",
+      "text": "short",
+      "steps": 16,
+      "cpu_busy": false,
+      "torch_threads": 2,
+      "generation_seconds": 2.701,
+      "audio_seconds": 2.36
+    },
+    {
+      "label": "16 idle t2",
+      "text": "medium",
+      "steps": 16,
+      "cpu_busy": false,
+      "torch_threads": 2,
+      "generation_seconds": 2.819,
+      "audio_seconds": 4.94
+    }
+  ],
+  "voice_batch": {
+    "sentences": 3,
+    "steps": 16,
+    "one_by_one_seconds": 8.728,
+    "batched_seconds": 5.208,
+    "audio_seconds": 7.73
+  },
+  "transcription": [
+    {
+      "device": "cpu",
+      "beam": 5,
+      "seconds_for_3_clips": 4.716,
+      "texts": [
+        "Good morning. I am ready when you are.",
+        "You can pause my voice or interrupt me at any time.",
+        "The card follows what you hear, so we stay on the same page."
+      ]
+    },
+    {
+      "device": "cpu",
+      "beam": 1,
+      "seconds_for_3_clips": 3.975,
+      "texts": [
+        "Good morning. I am ready when you are.",
+        "You can pause my voice or interrupt me at any time.",
+        "The card follows what you hear, so we stay on the same page."
+      ]
+    },
+    {
+      "device": "cuda",
+      "beam": 5,
+      "seconds_for_3_clips": 0.796,
+      "texts": [
+        "Good morning. I am ready when you are.",
+        "You can pause my voice or interrupt me at any time.",
+        "The card follows what you hear, so we stay on the same page."
+      ]
+    },
+    {
+      "device": "cuda",
+      "beam": 1,
+      "seconds_for_3_clips": 0.54,
+      "texts": [
+        "Good morning. I am ready when you are.",
+        "You can pause my voice or interrupt me at any time.",
+        "The card follows what you hear, so we stay on the same page."
+      ]
+    }
+  ]
+}

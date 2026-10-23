@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": [
+    "Reasoning authentication and bounded request/conversation validation",
+    "Synthetic microphone -> local transcript -> explicit review -> local answer -> actual spoken response; pause/resume",
+    "Interrupt while thinking cancels output; no late speech; overlap and in-flight clear rejected",
+    "Session recall, separate conversation isolation, cleared context excluded, unavailable calendar honestly disclosed",
+    "Clear removes displayed text/audio, responsive at four widths, no browser errors or external requests"
+  ],
+  "timings": {
+    "request_to_answer_ms": 12455,
+    "request_to_first_audio_ms": 17889
+  },
+  "plan": "Prioritize the client proposal for 25 minutes, focusing on key points and visuals to make a strong impression. Then, spend 5 minutes tidying your desk to create a professional appearance. Keep the proposal concise but impactful within the time limit.",
+  "recall": "Your example project is called Lantern.",
+  "after_clear": "I don't have access to your example project name. Could you please provide more context or share the details of the project you're referring to?",
+  "calendar": "I can't access your calendar. Could you please provide the details of the meeting or the date you'd like me to check?"
+}

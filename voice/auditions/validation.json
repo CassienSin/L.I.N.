@@ -1,0 +1,58 @@
+{
+  "status": "passed",
+  "checks": [
+    "8 WAVs valid, mono, 24 kHz, finite and audible signal, no clipping",
+    "manifest durations match files",
+    "comparison tracks match individual clips in English, Filipino, Cebuano order with 1.2-second pauses"
+  ],
+  "not_evaluated": [
+    "pronunciation",
+    "naturalness",
+    "voice consistency",
+    "real-time latency",
+    "speech recognition",
+    "code-switching"
+  ],
+  "files": [
+    {
+      "file": "lin-a-english.wav",
+      "seconds": 4.88,
+      "peak": 0.5
+    },
+    {
+      "file": "lin-a-filipino.wav",
+      "seconds": 5.8,
+      "peak": 0.6868
+    },
+    {
+      "file": "lin-a-cebuano.wav",
+      "seconds": 6.28,
+      "peak": 0.6449
+    },
+    {
+      "file": "lin-b-english.wav",
+      "seconds": 4.88,
+      "peak": 0.5
+    },
+    {
+      "file": "lin-b-filipino.wav",
+      "seconds": 5.7,
+      "peak": 0.6163
+    },
+    {
+      "file": "lin-b-cebuano.wav",
+      "seconds": 6.24,
+      "peak": 0.5579
+    },
+    {
+      "file": "lin-a-multilingual.wav",
+      "seconds": 19.36,
+      "peak": 0.6868
+    },
+    {
+      "file": "lin-b-multilingual.wav",
+      "seconds": 19.22,
+      "peak": 0.6163
+    }
+  ]
+}

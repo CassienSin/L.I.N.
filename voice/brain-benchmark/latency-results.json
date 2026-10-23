@@ -1,0 +1,160 @@
+{
+  "date": "2026-10-22T08:32:28.239Z",
+  "rows": [
+    {
+      "text": "I have 30 minutes to prepare a client proposal and tidy my desk. Help me choose what to do first.",
+      "route": "chat",
+      "first_text_s": 3.085,
+      "first_audio_ready_s": 7.163,
+      "total_s": 16.208,
+      "server_first_text_s": 2.956,
+      "segments": [
+        {
+          "ready_after_s": 7.117,
+          "gen_s": 4.159,
+          "audio_s": 2.79
+        },
+        {
+          "ready_after_s": 12.219,
+          "gen_s": 5.099,
+          "audio_s": 7.18
+        },
+        {
+          "ready_after_s": 16.088,
+          "gen_s": 3.868,
+          "audio_s": 5.63
+        }
+      ],
+      "timings": {
+        "answer": {
+          "first_sentence_ms": 2955,
+          "prompt_tokens": 33,
+          "prompt_ms": 1311,
+          "generated_tokens": 46,
+          "generation_ms": 7886,
+          "cached_tokens": 596,
+          "total_ms": 9207
+        }
+      },
+      "answer": "Prioritize the client proposal first. Dedicate 25 minutes to work on the proposal, then use the remaining 5 minutes to tidy your desk. This ensures your presentation is well-prepared and your workspace is organized."
+    },
+    {
+      "text": "I have 30 minutes to prepare a client proposal and tidy my desk. Help me choose what to do first.",
+      "route": "chat",
+      "first_text_s": 1.215,
+      "first_audio_ready_s": 4.735,
+      "total_s": 13.987,
+      "server_first_text_s": 1.121,
+      "segments": [
+        {
+          "ready_after_s": 4.652,
+          "gen_s": 3.529,
+          "audio_s": 2.79
+        },
+        {
+          "ready_after_s": 10.122,
+          "gen_s": 5.254,
+          "audio_s": 7.01
+        },
+        {
+          "ready_after_s": 13.934,
+          "gen_s": 3.81,
+          "audio_s": 5.46
+        }
+      ],
+      "timings": {
+        "answer": {
+          "first_sentence_ms": 1121,
+          "prompt_tokens": 1,
+          "prompt_ms": 141,
+          "generated_tokens": 46,
+          "generation_ms": 6838,
+          "cached_tokens": 628,
+          "total_ms": 6984
+        }
+      },
+      "answer": "Prioritize the client proposal first. Dedicate 25 minutes to focus on the proposal, then use the remaining 5 minutes to tidy your desk. This ensures your presentation is well-prepared and your workspace is clean."
+    },
+    {
+      "text": "Give me one tip for staying focused.",
+      "route": "chat",
+      "first_text_s": 2.541,
+      "first_audio_ready_s": 7.18,
+      "total_s": 15.073,
+      "server_first_text_s": 2.444,
+      "segments": [
+        {
+          "ready_after_s": 7.056,
+          "gen_s": 4.609,
+          "audio_s": 5.32
+        },
+        {
+          "ready_after_s": 11.271,
+          "gen_s": 4.214,
+          "audio_s": 5.81
+        },
+        {
+          "ready_after_s": 14.974,
+          "gen_s": 3.701,
+          "audio_s": 4.92
+        }
+      ],
+      "timings": {
+        "answer": {
+          "first_sentence_ms": 2444,
+          "prompt_tokens": 17,
+          "prompt_ms": 480,
+          "generated_tokens": 49,
+          "generation_ms": 7296,
+          "cached_tokens": 596,
+          "total_ms": 7781
+        }
+      },
+      "answer": "Take short breaks every hour to avoid burnout and maintain mental clarity. Use the Pomodoro Technique: work for 25 minutes, then take a 5-minute break. This helps keep your focus sharp and sustainable throughout the day."
+    },
+    {
+      "text": "Should I go to the gym this afternoon?",
+      "route": "free_time",
+      "first_text_s": 6.261,
+      "first_audio_ready_s": 10.22,
+      "total_s": 17.129,
+      "server_first_text_s": 6.245,
+      "segments": [
+        {
+          "ready_after_s": 10.206,
+          "gen_s": 3.959,
+          "audio_s": 3.84
+        },
+        {
+          "ready_after_s": 13.512,
+          "gen_s": 3.305,
+          "audio_s": 3.25
+        },
+        {
+          "ready_after_s": 17.045,
+          "gen_s": 3.532,
+          "audio_s": 3.71
+        }
+      ],
+      "timings": {
+        "route": {
+          "prompt_tokens": 18,
+          "prompt_ms": 462,
+          "generated_tokens": 16,
+          "generation_ms": 2009,
+          "cached_tokens": 379
+        },
+        "answer": {
+          "first_sentence_ms": 3768,
+          "prompt_tokens": 109,
+          "prompt_ms": 2224,
+          "generated_tokens": 34,
+          "generation_ms": 5013,
+          "cached_tokens": 596,
+          "total_ms": 7242
+        }
+      },
+      "answer": "Lin cannot see your calendar since no import was done. There are no scheduled events this afternoon. You may choose to go to the gym based on your own schedule."
+    }
+  ]
+}

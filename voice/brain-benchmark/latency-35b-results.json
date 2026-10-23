@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-22T13:06:13.549Z",
+  "rows": [
+    {
+      "text": "What tasks are left?",
+      "route": "tasks",
+      "first_text_s": 0.043,
+      "first_audio_ready_s": 4.008,
+      "total_s": 4.008,
+      "segments": [
+        {
+          "ready_after_s": 3.957,
+          "gen_s": 3.934,
+          "audio_s": 2.36
+        }
+      ],
+      "answer": "You have no open tasks right now."
+    },
+    {
+      "text": "Add a task to buy bond paper",
+      "route": "add_task",
+      "first_text_s": 0.185,
+      "first_audio_ready_s": 2.68,
+      "total_s": 5.259,
+      "segments": [
+        {
+          "ready_after_s": 2.548,
+          "gen_s": 2.495,
+          "audio_s": 7.2
+        },
+        {
+          "ready_after_s": 5.226,
+          "gen_s": 2.676,
+          "audio_s": 2.9
+        }
+      ],
+      "answer": "I've prepared this for you to approve: Add task “Buy bond paper”, personal, 25 min, normal priority. Nothing changes until you press Approve."
+    },
+    {
+      "text": "What is on my calendar tomorrow?",
+      "route": "agenda",
+      "first_text_s": 0.041,
+      "first_audio_ready_s": 2.357,
+      "total_s": 4.571,
+      "segments": [
+        {
+          "ready_after_s": 2.266,
+          "gen_s": 2.252,
+          "audio_s": 4.88
+        },
+        {
+          "ready_after_s": 4.461,
+          "gen_s": 2.19,
+          "audio_s": 1.76
+        }
+      ],
+      "answer": "No calendar has been imported yet, so I can’t see your events or free time. Import one in Today."
+    },
+    {
+      "text": "I have 30 minutes to prepare a client proposal and tidy my desk. Help me choose what to do first.",
+      "route": "chat",
+      "first_text_s": 12.7,
+      "first_audio_ready_s": 14.948,
+      "total_s": 14.948,
+      "server_first_text_s": 12.611,
+      "segments": [
+        {
+          "ready_after_s": 14.847,
+          "gen_s": 2.232,
+          "audio_s": 5.85
+        }
+      ],
+      "timings": {
+        "answer": {
+          "prompt_tokens": 36,
+          "prompt_ms": 2654,
+          "generated_tokens": 23,
+          "generation_ms": 8002,
+          "cached_tokens": 880,
+          "total_ms": 12610,
+          "first_sentence_ms": 12610
+        }
+      },
+      "answer": "Start with 25 minutes on the proposal, then use the final 5 minutes to tidy your desk."
+    },
+    {
+      "text": "Give me one tip for staying focused.",
+      "route": "chat",
+      "first_text_s": 11.026,
+      "first_audio_ready_s": 13.501,
+      "total_s": 13.501,
+      "server_first_text_s": 10.88,
+      "segments": [
+        {
+          "ready_after_s": 13.449,
+          "gen_s": 2.564,
+          "audio_s": 7.39
+        }
+      ],
+      "timings": {
+        "answer": {
+          "prompt_tokens": 20,
+          "prompt_ms": 1917,
+          "generated_tokens": 26,
+          "generation_ms": 8786,
+          "cached_tokens": 940,
+          "total_ms": 10878,
+          "first_sentence_ms": 10878
+        }
+      },
+      "answer": "Set a visible timer for 25 minutes, close unrelated tabs, and work on a single clear step until it rings."
+    }
+  ]
+}

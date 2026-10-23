@@ -1,0 +1,115 @@
+{
+  "engine": "OmniVoice",
+  "device": "cpu",
+  "threads": 6,
+  "model_load_seconds": 1.89,
+  "network": "Offline environment flags and socket connection blocking enabled for the generation process",
+  "purpose": "Personal, noncommercial voice evaluation only",
+  "license": "CC-BY-NC; not approved as Lin's business-production engine",
+  "reference": "Synthetic English sample generated here; no real person's reference recording used",
+  "listening_review": "Pending user audition; no claim of native pronunciation or voice consistency",
+  "samples": [
+    {
+      "profile": "a",
+      "language": "english",
+      "language_id": "en",
+      "text": "Good morning. Your plan is ready. Let's start with the most important task.",
+      "file": "lin-a-english.wav",
+      "sample_rate": 24000,
+      "duration_seconds": 4.88,
+      "generation_seconds": 91.21,
+      "realtime_factor": 18.69,
+      "peak": 0.5,
+      "rms": 0.0777
+    },
+    {
+      "profile": "a",
+      "language": "filipino",
+      "language_id": "fil",
+      "text": "Magandang umaga. Handa na ang plano mo. Unahin natin ang pinakamahalagang gawain.",
+      "file": "lin-a-filipino.wav",
+      "sample_rate": 24000,
+      "duration_seconds": 5.8,
+      "generation_seconds": 179.67,
+      "realtime_factor": 30.98,
+      "peak": 0.6868,
+      "rms": 0.1042
+    },
+    {
+      "profile": "a",
+      "language": "cebuano",
+      "language_id": "ceb",
+      "text": "Maayong buntag. Andam na ang imong plano. Unahon nato ang labing importanteng buluhaton.",
+      "file": "lin-a-cebuano.wav",
+      "sample_rate": 24000,
+      "duration_seconds": 6.28,
+      "generation_seconds": 145.88,
+      "realtime_factor": 23.23,
+      "peak": 0.6449,
+      "rms": 0.0928
+    },
+    {
+      "profile": "b",
+      "language": "english",
+      "language_id": "en",
+      "text": "Good morning. Your plan is ready. Let's start with the most important task.",
+      "file": "lin-b-english.wav",
+      "sample_rate": 24000,
+      "duration_seconds": 4.88,
+      "generation_seconds": 89.1,
+      "realtime_factor": 18.26,
+      "peak": 0.5,
+      "rms": 0.1033
+    },
+    {
+      "profile": "b",
+      "language": "filipino",
+      "language_id": "fil",
+      "text": "Magandang umaga. Handa na ang plano mo. Unahin natin ang pinakamahalagang gawain.",
+      "file": "lin-b-filipino.wav",
+      "sample_rate": 24000,
+      "duration_seconds": 5.7,
+      "generation_seconds": 181.2,
+      "realtime_factor": 31.79,
+      "peak": 0.6163,
+      "rms": 0.1059
+    },
+    {
+      "profile": "b",
+      "language": "cebuano",
+      "language_id": "ceb",
+      "text": "Maayong buntag. Andam na ang imong plano. Unahon nato ang labing importanteng buluhaton.",
+      "file": "lin-b-cebuano.wav",
+      "sample_rate": 24000,
+      "duration_seconds": 6.24,
+      "generation_seconds": 190.36,
+      "realtime_factor": 30.51,
+      "peak": 0.5579,
+      "rms": 0.1106
+    }
+  ],
+  "comparisons": [
+    {
+      "profile": "a",
+      "label": "Lin A — conversational",
+      "file": "lin-a-multilingual.wav",
+      "language_order": [
+        "english",
+        "filipino",
+        "cebuano"
+      ],
+      "duration_seconds": 19.36
+    },
+    {
+      "profile": "b",
+      "label": "Lin B — lower register",
+      "file": "lin-b-multilingual.wav",
+      "language_order": [
+        "english",
+        "filipino",
+        "cebuano"
+      ],
+      "duration_seconds": 19.22
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "“Search my brain: panel feedback” flies the map to “Panel feedback”, opens it in the inspector and lights its neighbours",
+    "An answer that drew on 5 sources frames and lights the whole cluster, with every source on screen",
+    "Zoomed out, the map names 8 neighbourhoods (Capstone, Tasks, Journal, Classes…); clicking “Capstone” opens it; searching a group name finds it",
+    "Small talk does not move the map; no page errors"
+  ],
+  "date": "2026-10-23T08:28:26.585Z"
+}

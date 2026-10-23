@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "checks": [
+    "Greeting uses real numbers (“Good afternoon, Sam. Lin Brain has 28 notes and 6 memories. You have 1…”) and is spoken after the first click; the pearl follows her voice (peak 0.87)",
+    "A direct lookup shows its steps live with timings: Understanding your request → Checking your saved tasks → Reading the exact answer from your data → Giving it a voice → Done",
+    "A written answer shows: Understanding your request → Recalling 1 saved fact → Speaking while she finishes the answer → Done",
+    "Answers say what was not checked: general-knowledge chat says so, and a notes search names the word nothing mentioned (“zeppelin”)",
+    "Save to brain asks first with an editable title, writes the note into Lin Brain, flies the map to it, and Undo removes it",
+    "Fits 390/320 px; no page errors or outside requests"
+  ],
+  "date": "2026-10-23T08:29:54.670Z"
+}

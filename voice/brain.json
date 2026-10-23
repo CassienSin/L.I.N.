@@ -1,0 +1,5 @@
+{
+  "model": "Qwen3-4B-Q4_K_M.gguf",
+  "gpu_layers": 0,
+  "note": "Chosen in About you. Fast: Qwen3 4B on the processor. Quickest simple answers."
+}

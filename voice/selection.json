@@ -1,0 +1,24 @@
+{
+  "record_type": "design_preference_not_runtime_configuration",
+  "recorded_on": "2026-10-21",
+  "source": "Direct user feedback after the local auditions",
+  "preferred_profile": "a",
+  "label": "Lin A — conversational",
+  "reference_audio": "auditions/lin-a-english.wav",
+  "primary_language": "en",
+  "default_spoken_language": "en",
+  "secondary_languages": ["fil", "ceb"],
+  "user_feedback": {
+    "voice": "Prefers A",
+    "filipino_pronunciation": "Off; accepted for now",
+    "cebuano_pronunciation": "Off; accepted for now",
+    "usage": "Mostly English"
+  },
+  "next_priorities": [
+    "English delivery matching the A reference",
+    "Responsive local speech generation",
+    "Interruption and audio-synchronized interface behavior"
+  ],
+  "production_engine_selected": false,
+  "secondary_language_improvements_block_english_prototype": false
+}
