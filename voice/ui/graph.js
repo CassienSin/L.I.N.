@@ -10,6 +10,21 @@
    task: {label: 'Tasks', color: '#FF8F7A'}, memory: {label: 'Memories', color: '#EFE6D2'}, event: {label: 'Events', color: '#E0B85C'}
  };
  const EDGES = {link: {label: 'Links', color: '#7EE8CF'}, mention: {label: 'Mentions', color: '#EFE6D2'}, schedule: {label: 'Scheduling', color: '#E0B85C'}};
+ // Colours follow Lin's theme (orbit.css); the canvas reads them once per theme change.
+ const THEMES = {
+   dark: {kinds: {note: '#4FF3FF', topic: '#8CB8FF', task: '#FF8F7A', memory: '#B9AEFF', event: '#F5B556'}, edges: {link: '#4FF3FF', mention: '#B9AEFF', schedule: '#F5B556'}},
+   light: {kinds: {note: '#0A8F9E', topic: '#3D6FD0', task: '#C2492F', memory: '#6A5BE0', event: '#B06A00'}, edges: {link: '#0A8F9E', mention: '#6A5BE0', schedule: '#B06A00'}}
+ };
+ let P = {};
+ function palette() {
+   const css = getComputedStyle(document.documentElement), v = k => css.getPropertyValue(k).trim();
+   const theme = document.documentElement.dataset.themeResolved === 'light' ? 'light' : 'dark';
+   P = {bg: v('--map-bg') || '#04060A', bgRgb: v('--bg-rgb') || '4,6,10', text: v('--text') || '#E8F1F6', textRgb: v('--text-rgb') || '232,241,246',
+        accentRgb: v('--accent-rgb') || '79,243,255', accent: v('--accent') || '#4FF3FF', spark: theme === 'light' ? '#0B1B2B' : '#FFFFFF'};
+   for (const [k, c] of Object.entries(THEMES[theme].kinds)) KINDS[k].color = c;
+   for (const [k, c] of Object.entries(THEMES[theme].edges)) EDGES[k].color = c;
+   for (const n of nodes) n.color = (KINDS[n.kind] || KINDS.note).color;
+ }
  const SINGULAR = {note: 'Note', topic: 'Topic', task: 'Task', memory: 'Memory', event: 'Event'};
  const PULSE_EVERY_MS = 2600, PULSE_MS = 1400, FOCAL = 900;
 
@@ -148,7 +163,7 @@
 
  function draw(t) {
    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, width, height);
-   ctx.fillStyle = '#051519'; ctx.fillRect(0, 0, width, height);
+   ctx.fillStyle = P.bg; ctx.fillRect(0, 0, width, height);
    const subject = hover || focus, lit = litSet(), dimming = !!(subject || path || answerSources);
    for (const n of nodes) n.p = visible(n) ? project(n, t) : null;
    // Connections, grouped by kind so dashes and colours change rarely.
@@ -174,7 +189,7 @@
      for (const p of pulses) {
        const k = (t - p.t0) / PULSE_MS, x = p.e.a.p.x + (p.e.b.p.x - p.e.a.p.x) * k, y = p.e.a.p.y + (p.e.b.p.y - p.e.a.p.y) * k;
        ctx.globalAlpha = Math.sin(k * Math.PI) * .9; ctx.drawImage(sprite(EDGES[p.e.kind].color), x - 9, y - 9, 18, 18);
-       ctx.fillStyle = '#FFF8EA'; ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 6.283); ctx.fill();
+       ctx.fillStyle = P.spark; ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 6.283); ctx.fill();
      }
      ctx.globalAlpha = 1;
    }
@@ -185,9 +200,9 @@
      ctx.globalAlpha = (on ? 1 : .12) * depthFade;
      if (on && (n.degree >= 4 || lit.has(n.id))) ctx.drawImage(sprite(n.color), n.p.x - r * 2.6, n.p.y - r * 2.6, r * 5.2, r * 5.2);
      ctx.fillStyle = n.color; ctx.beginPath(); ctx.arc(n.p.x, n.p.y, n === hover ? r * 1.25 : r, 0, 6.283); ctx.fill();
-     if (n === focus || (path && (n.id === path[0] || n.id === path[path.length - 1]))) { ctx.strokeStyle = '#EFE6D2'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(n.p.x, n.p.y, r + 6, 0, 6.283); ctx.stroke(); }
-     if (answerSources && answerSources.has(n.id)) { const glow = reduced.matches ? .8 : .55 + .35 * Math.sin(t / 380); ctx.strokeStyle = `rgba(126,232,207,${glow})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(n.p.x, n.p.y, r + 10, 0, 6.283); ctx.stroke(); }
-     if (q && n.title.toLocaleLowerCase().includes(q)) { ctx.strokeStyle = '#7EE8CF'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(n.p.x, n.p.y, r + 4, 0, 6.283); ctx.stroke(); }
+     if (n === focus || (path && (n.id === path[0] || n.id === path[path.length - 1]))) { ctx.strokeStyle = P.text; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(n.p.x, n.p.y, r + 6, 0, 6.283); ctx.stroke(); }
+     if (answerSources && answerSources.has(n.id)) { const glow = reduced.matches ? .8 : .55 + .35 * Math.sin(t / 380); ctx.strokeStyle = `rgba(${P.accentRgb},${glow})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(n.p.x, n.p.y, r + 10, 0, 6.283); ctx.stroke(); }
+     if (q && n.title.toLocaleLowerCase().includes(q)) { ctx.strokeStyle = P.accent; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(n.p.x, n.p.y, r + 4, 0, 6.283); ctx.stroke(); }
    }
    ctx.globalAlpha = 1;
    const placed = drawLabels(order, lit, dimming);
@@ -202,16 +217,16 @@
      const x = pts.reduce((s, n) => s + n.p.x, 0) / pts.length, y = pts.reduce((s, n) => s + n.p.y, 0) / pts.length;
      const d = pts.map(n => Math.hypot(n.p.x - x, n.p.y - y)).sort((a, b) => a - b), r = Math.max(28, d[Math.floor(d.length * .7)] + 16);
      ctx.globalAlpha = dimming ? .25 : 1;
-     ctx.fillStyle = 'rgba(126,232,207,.035)'; ctx.strokeStyle = 'rgba(126,232,207,.16)'; ctx.lineWidth = 1;
+     ctx.fillStyle = `rgba(${P.accentRgb},.04)`; ctx.strokeStyle = `rgba(${P.accentRgb},.18)`; ctx.lineWidth = 1;
      ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill(); ctx.stroke();
-     ctx.font = `600 ${c.size >= 20 ? 16 : 14}px Bahnschrift, 'Segoe UI', sans-serif`;
+     ctx.font = `600 ${c.size >= 20 ? 16 : 14}px 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif`;
      const text = c.name, sub = `${c.size} items`, w = Math.max(ctx.measureText(text).width, 50);
      const box = {x: x - w / 2 - 8, y: y - 13, w: w + 16, h: 34, c};
      if (placed.some(b => box.x < b.x + b.w && box.x + box.w > b.x && box.y < b.y + b.h && box.y + box.h > b.y)) continue;
      placed.push(box); boxes.push(box);
-     ctx.fillStyle = 'rgba(5,21,25,.78)'; ctx.fillRect(box.x, box.y, box.w, box.h);
-     ctx.fillStyle = '#EFE6D2'; ctx.textBaseline = 'top'; ctx.textAlign = 'center'; ctx.fillText(text, x, box.y + 3);
-     ctx.font = `400 11px Bahnschrift, 'Segoe UI', sans-serif`; ctx.fillStyle = 'rgba(227,241,238,.6)'; ctx.fillText(sub, x, box.y + 20); ctx.textAlign = 'left';
+     ctx.fillStyle = `rgba(${P.bgRgb},.8)`; ctx.fillRect(box.x, box.y, box.w, box.h);
+     ctx.fillStyle = P.text; ctx.textBaseline = 'top'; ctx.textAlign = 'center'; ctx.fillText(text, x, box.y + 3);
+     ctx.font = `400 11px 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif`; ctx.fillStyle = `rgba(${P.textRgb},.68)`; ctx.fillText(sub, x, box.y + 20); ctx.textAlign = 'left';
    }
    ctx.globalAlpha = 1;
    return boxes;
@@ -234,6 +249,7 @@
 
  // Most connected first; any label that would overlap one already placed is skipped.
  function drawLabels(order, lit, dimming) {
+   if (document.body.dataset.view === 'home') return [];  // Home shows the map as a quiet constellation behind the emblem.
    const placed = [], q = query.toLocaleLowerCase();
    const ranked = order.slice().sort((a, b) => score(b) - score(a));
    const far = overview();
@@ -244,13 +260,13 @@
      const important = n === focus || n === hover || (dimming && lit.has(n.id)) || (q && n.title.toLocaleLowerCase().includes(q));
      if (!important && (dimming || n.degree < 2 || far)) continue;
      const size = n === focus || n === hover ? 15 : n.degree >= 8 ? 13 : 12;
-     ctx.font = `${n === focus ? 500 : 400} ${size}px Bahnschrift, 'Segoe UI', sans-serif`;
+     ctx.font = `${n === focus ? 500 : 400} ${size}px 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif`;
      const text = n.title.length > 34 ? n.title.slice(0, 33) + '…' : n.title, w = ctx.measureText(text).width;
      const r = n.r * n.p.s, box = {x: n.p.x - w / 2 - 3, y: n.p.y + r + 4, w: w + 6, h: size + 4};
      if (placed.some(b => box.x < b.x + b.w && box.x + box.w > b.x && box.y < b.y + b.h && box.y + box.h > b.y)) continue;
      placed.push(box); count++;
-     ctx.globalAlpha = important || !dimming ? 1 : .35; ctx.fillStyle = 'rgba(5,21,25,.65)'; ctx.fillRect(box.x, box.y, box.w, box.h);
-     ctx.fillStyle = '#E3F1EE'; ctx.textBaseline = 'top'; ctx.fillText(text, box.x + 3, box.y + 2);
+     ctx.globalAlpha = important || !dimming ? 1 : .35; ctx.fillStyle = `rgba(${P.bgRgb},.7)`; ctx.fillRect(box.x, box.y, box.w, box.h);
+     ctx.fillStyle = P.text; ctx.textBaseline = 'top'; ctx.fillText(text, box.x + 3, box.y + 2);
    }
    ctx.globalAlpha = 1;
    return placed;
@@ -463,7 +479,9 @@
  function endDrag(e) {
    if (!drag) return; const d = drag; drag = null; canvas.classList.remove('dragging');
    if (d.node) d.node.pinned = false;
-   if (d.moved < 5 && !d.target) {
+   if (d.moved < 5) {
+     // A neighbourhood name is drawn on top of its items, so a click on the name opens the neighbourhood
+     // even when an item sits underneath it.
      const hitBox = clusterBoxes.find(b => d.x >= b.x && d.x <= b.x + b.w && d.y >= b.y && d.y <= b.y + b.h);
      if (hitBox) { openCluster(hitBox.c); return; }
    }
@@ -520,6 +538,7 @@
  document.addEventListener('lin:work-state', e => { closed = !!e.detail.closed; });
  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
  window.addEventListener('resize', () => { resize(); });
+ document.addEventListener('lin:theme', () => { palette(); renderLens(); renderInspector(); renderList(); dirty = true; });
  // Hooks for the automated checks; they read state or measure, and never change your data.
  function benchmark(count) {
    const saved = data, fake = {nodes: [], edges: [], counts: {}, edge_counts: {}, hubs: [], revision: 'benchmark', demo: saved?.demo};
@@ -539,5 +558,5 @@
    showSources,
    clusters: () => [...clusterInfo.values()].map(c => ({id: c.id, name: c.name, size: c.size, why: c.why})),
    overview, clusterBoxes: () => clusterBoxes.map(b => ({name: b.c.name, x: b.x + b.w / 2, y: b.y + b.h / 2})), zoomTo: k => { zoomAt(k / cam.k); }};
- resize(); refresh(); setInterval(refresh, 5000); requestAnimationFrame(loop);
+ palette(); resize(); refresh(); setInterval(refresh, 5000); requestAnimationFrame(loop);
 })();

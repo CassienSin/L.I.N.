@@ -1,6 +1,6 @@
 # Lin — product blueprint
 
-Version 0.18 · 23 October 2026 · Status: Tidepool command screen, About you profile, demo mode, the approval-gated action layer, connected MCP tools (including read-only Google Docs, Drive and Sheets), a faster local voice and hearing pipeline, and Lin Brain reading documents and photos
+Version 0.21 · 23 October 2026 · Status: Claude as an optional online brain (through Claude Code with the user's own plan, asked first), conversation memory, the Orbit look (the emblem is the interface, dark and light), a greeting with a personality, the approval-gated action layer with hold to approve, connected MCP tools (including read-only Google Docs, Drive and Sheets), a faster local voice and hearing pipeline, and Lin Brain reading documents and photos
 
 ## Product definition
 
@@ -11,7 +11,7 @@ Lin is a Windows desktop assistant for personal and business work. Its planned c
 - Name: Lin.
 - Scope: personal and business use.
 - Deployment: a desktop environment on Windows.
-- AI processing: local, including reasoning, transcription, speech generation, embeddings, and document extraction.
+- AI processing: local, including reasoning, transcription, speech generation, embeddings, and document extraction. One chosen exception (23 October 2026): Claude can answer questions the user sends it, only through Claude Code signed in with his own Claude plan, and only when he turns it on.
 - Connectivity: works offline; approved internet and app connections extend its capabilities.
 - Experience: spoken requests, brief spoken summaries, source-backed cards, meaningful animation.
 - Voice identity: feminine, calm, warm, confident, natural pacing, concise summaries, and occasional dry humor.
@@ -136,8 +136,9 @@ Animation communicates state: a listening response, bounded work motion, segment
 | Calendar/inbox | Previously synced material or local imports, labeled with last sync | Fetch fresh records from connected providers |
 | Web research | Saved research only | External searches and page retrieval; analysis stays local |
 | External actions | Prepare drafts; mark as unsent | Preview and approve before execution |
+| Hard questions | The local brain answers | Claude through Claude Code: Ask me first shows the exact text and waits for approval; Claude for conversation sends everyday questions; private conversations never |
 
-Network policy separates model processes from connectors. Model processes have no intended network egress. A connector can contact only approved service endpoints. Cloud model fallback is prohibited. Model downloads and software updates are explicit setup/maintenance events.
+Network policy separates model processes from connectors. Model processes have no intended network egress. A connector can contact only approved service endpoints. Silent cloud model fallback is prohibited. The one cloud model is Claude, which the user turns on himself; it runs as the separate Claude Code program he installed and signed in to, so Lin's own process still has no network egress (see Claude as the online brain). Model downloads and software updates are explicit setup/maintenance events.
 
 Search queries and service requests do leave the computer. Private terms require a preview unless covered by a deliberately granted scope. Never send whole documents merely to improve a search query. Logs must not retain credentials or unnecessary message contents.
 
@@ -320,3 +321,47 @@ Lin is an MCP client (voice/mcp_client.py, stdio transport). You add servers in 
 - Measured on this laptop: nine sample documents (Word, three PDFs, PowerPoint, Excel, ODT, RTF, HTML, a photo) were read in 16 s, including two OCR passes.
 - Tests: voice/verify_docs.py with the invented samples in design/doc-samples (built by design/make_doc_samples.py), and design/verify-docs.cjs in the browser. Both are part of Run-CommandChecks. design/Run-DocCheck.cmd is the quick version, and design/Probe-Ocr.cmd diagnoses text recognition.
 
+## The Orbit look, and a greeting with a soul (23 October 2026)
+
+Chosen on the design canvas "Lin redesign" (page v2 · Orbit): Lin herself is the interface. It replaces Tidepool's look; Tidepool's map lives on as the Map section.
+
+- Home: Lin opens on her emblem, with the day ring around it (today's calendar, the time now, the next event in amber), open tasks on the left, Lin Brain counts on the right and her greeting underneath. The map stays behind Home as a faint constellation; Map opens it fully with the inspector and lens. A labelled rail (Home, Map, Today, Plan, Notes, Activity, Tools, Settings) on the PC becomes a tab bar on the phone. The other sections open as sheets.
+- The emblem (voice/ui/emblem.js) is drawn live: rings, a sweep, two orbits and an eye, eased between moods in one animation loop. Status colours always mean the same thing: cyan ready, violet thinking, amber waiting for your approval, gold seeing your screen (for Phase 5), grey offline. It follows her voice and the microphone level. On start-up the rings assemble in about 1.6 s while readouts under it report real checks (Voice, Brain, Memory, Calendar), amber with what still works while something loads; reopening within five minutes skips this.
+- Answers wired to their sources: on wide windows the emblem steps aside with "How I got this" (each step and its time), the answer sits in the middle and the source and approval cards on the right, joined to the answer by a flowing line.
+- Hold to approve: Approve fills a ring while held (0.7 s); a quick click does nothing. From the keyboard or a screen reader, press it twice within 3 s. The receipt with Undo stays on screen while Lin speaks the confirmation.
+- The day ring is a slider: drag along it, or use the arrow keys, Home and End, to hear what's on at any time; Enter or tapping an event opens Today.
+- Lin's sounds (voice/ui/sounds.js) are made on this PC with Web Audio: a chime when she listens, a soft hum while she thinks, a swish when you send, a click when you approve, two soft notes when a change waits, falling notes when something is blocked, and a wake-up chime. They never play over her voice and follow Mute and Settings > Look.
+- Settings > Look: dark, light (blueprint) or match Windows; high contrast; calm motion (also automatic when Windows reduces animations); large captions; sounds. Tokens live in voice/ui/orbit.css and recolour every older panel, including the map canvas.
+- Fonts stay built into Windows (Bahnschrift for readouts, Segoe UI Variable for reading), so the look is identical offline.
+- Accessibility: every text and background pair passes 4.5:1 in both themes, targets are at least 24 px, every control has a name, and keyboard order runs rail, Home, then the line you type on.
+- The greeting (voice/presence.py) is built from what matters right now: an opener for the time of day, weekend or how long you've been away, at most two real facts (a meeting about to start, documents read while you were away, the high-priority task), then a question tied to the last fact. Wording rotates between visits and a reload within 10 minutes keeps the same greeting (voice/data/presence.json).
+- Fixed on the way: the saved-memories list in Notes had stopped loading after the Fast/Smart switch reused GET /api/brain; that endpoint now answers both.
+- Next: Phase 3 builds the Windows app (Tauri) with the floating emblem, the tray and Ctrl+Space, which the Orbit mockups already show.
+
+## Conversation memory (23 October 2026)
+
+Phase 1. Lin keeps every conversation on this PC, with no Conversations panel: it all happens in the background (voice/conversations.py, voice/data/conversations.sqlite3; the demo has its own).
+
+- Saved: each exchange (what you asked, what Lin said, what she checked and how it was verified) with its time, under a short title taken from your first question. Saving never blocks or breaks an answer.
+- Picked back up: reloading or reopening Lin continues the latest conversation from the last 12 hours, with its last four exchanges back in her short-term memory; Settings shows "Picking up our conversation from 9:14 PM". "Clear conversation" starts a new one and keeps the old one saved.
+- Recall: "What did we talk about yesterday?", "Did we ever discuss Chapter 4?", "Where did we leave off?" are answered only from saved turns (today, this morning, yesterday, last night, this or last week or month, N days ago, a weekday, or any time; plus the topic words). The card lists the turns she read with their times, the honesty line says only conversations were searched, and "nothing saved from last month" is said exactly rather than guessed. Earlier recall questions are not treated as answers.
+- Privacy by voice: "Don't save this conversation" stops saving it at once (earlier turns stay until you ask to forget them); "start saving again" resumes. "Forget this conversation", "forget today's / yesterday's / this week's conversations" or "forget all conversations" shows an approval card with the exact count; after you hold to approve, the turns are gone from every answer at once, Undo works for 10 minutes, and then they are erased from the file (secure delete).
+- Summaries: when a conversation has been quiet for three minutes and Lin has been idle for 90 seconds, the local brain writes a one-sentence summary on its own reasoning thread. A request arriving stops it at once (measured 0.1 s).
+- Suggested memories: when you mention a dated fact about yourself ("my defense is on November 12"), a "Remember this?" card offers to save it as a memory. Nothing is saved unless you press Save, and facts already in your memories are not suggested again.
+- Tests: voice/verify_conversations.py (store, rules, forget and undo through the action layer, secure erase, honesty, suggestions, summaries) and design/verify-memory.cjs in the browser with the real brain (save, reload, recall, private, forget). Both are in Run-CommandChecks.
+
+## Claude as the online brain (23 October 2026)
+
+Phase 2. Lin can hand a question to Claude, but only through Claude Code on this PC, signed in with the user's own Claude plan (voice/cloud_brain.py). Lin never holds a key, token or password, and its own process stays offline: the connection is Claude Code's.
+
+- Settings, Brain, "Claude, when you want it": On this PC only (the default), Ask me first, or Claude for conversation, plus the model (Sonnet by default, Opus, Haiku). The status line shows the Claude Code version and "Signed in with your Claude plan", and how many questions went to Claude this week.
+- Ask me first: quick questions stay local. Hard, open ones (explain, compare, write, code, long pasted text) get a "Send to Claude?" card showing the exact text that would be sent. Nothing is sent until he holds Send; "Answer on this PC" answers locally instead. An approval allows exactly one send of exactly that text, in that conversation, within 10 minutes. "Ask Claude …", "… ask Claude" and "send this to Claude" work in any mode except Off.
+- Claude for conversation: everyday questions go straight to Claude. Tasks, notes, calendar, memories, documents, recall and tools are still answered from local data.
+- What Claude sees: the question and, so a follow-up makes sense, the last exchange. Never notes, memories, tasks, calendar, profile or files, and nothing from a private conversation ("don't save this conversation" also keeps it off Claude).
+- How Claude Code is run: `claude -p` reading the text from standard input, `--output-format stream-json --verbose --include-partial-messages`, `--tools ""` and `--disallowedTools "*"`, `--strict-mcp-config`, `--safe-mode` (no CLAUDE.md, skills, plugins, hooks or auto memory), `--disable-slash-commands`, `--no-session-persistence`, `--max-turns 1`, `--permission-mode dontAsk`, `--model`, and `--system-prompt-file` with Lin's spoken-answer identity. It runs in an empty folder (voice/runtime/claude-work), inside a Windows job so it never outlives Lin, with ANTHROPIC_* settings, CLAUDE_CODE_OAUTH_TOKEN and other-provider switches removed. Lin uses it only when `claude auth status` reports authMethod "claude.ai", never an API key or copied token. An older Claude Code that lacks an option is retried without it.
+- Speaking and honesty: Claude's sentences are spoken as they stream. A "Sent to Claude" card shows the exact text, and the honesty lines say Claude saw only that text and that Lin did not check the answer. While Claude answers, the emblem turns coral (LINK · CLAUDE) and the place chip reads Online · Claude.
+- Falling back: a usage limit (with its reset time), sign-in loss, no internet, an overloaded or stuck Claude Code are recognised within seconds. Lin says why ("Your Claude usage limit is reached, until about 4:10 PM, so I'll answer this one on this PC") and the local brain answers. If Claude stopped partway, what was already spoken stays and the card says so. Interrupt stops Claude Code at once.
+- Records: voice/data/claude.json (the choice), voice/data/claude-sent.jsonl (when, which model, size and outcome only, never the words), and each send in Activity as "Sent to Claude".
+- Setup: design/Install-ClaudeCode.cmd runs Anthropic's installer (irm https://claude.ai/install.ps1 | iex), then `claude auth login` so he signs in himself. Claude Code shares the plan's usage with claude.ai (five-hour and weekly limits).
+- Tests: voice/verify_claude.py and design/verify-claude.cjs use voice/claude_stand_in.py, a stand-in that never connects anywhere, so the checks never use his plan. Both are in Run-CommandChecks.
+- Next: Lin's own tools offered to Claude over MCP (read-only first, writes still through approval cards), and a weekly privacy report built from the send log.

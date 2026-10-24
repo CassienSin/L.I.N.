@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 import json
+import re
 import sys
 import tempfile
 
@@ -29,13 +30,35 @@ with tempfile.TemporaryDirectory(prefix='presence-test-') as tmp:
     calendar = CalendarStore(tmp / 'data')
     now = datetime(2026, 10, 23, 19, 5, tzinfo=ZONE)
 
+    from datetime import timedelta
     g = presence.greeting('Aljho', brain.status(), planner, calendar, now)
-    assert g.startswith('Good evening, Aljho.') and 'Lin Brain has 1 note and 1 memory.' in g and '2 open tasks, 1 high priority.' in g, g
-    assert 'calendar' not in g.lower(), 'no calendar sentence without an imported calendar'
-    assert presence.greeting('Aljho', {'files': 3, 'memories': 6}, planner, calendar, now.replace(hour=8)).startswith('Good morning')
-    assert presence.greeting('Aljho', {}, planner, calendar, now.replace(hour=0, minute=18)).startswith('Good evening'), 'just after midnight is still evening'
-    assert '3 notes and 6 memories' in presence.greeting('Aljho', {'files': 3, 'memories': 6}, planner, calendar, now)
-    checks.append(f'Greeting uses real counts and the time of day: “{g}”')
+    sentences = [x for x in re.split(r'(?<=[.?!])\s+', g) if x]
+    assert 'Aljho' in g and 'Finish slides' in g, g
+    assert 2 <= len(sentences) <= 4 and len(g) < 280 and g.rstrip().endswith('?'), g
+    assert 'Lin Brain has' not in g and 'calendar' not in g.lower(), 'no robotic counts, no calendar sentence without a calendar'
+    assert any(o.format(name='Aljho') in g for o in presence.OPENERS['evening']), g
+    night = presence.greeting('Aljho', {}, planner, calendar, now.replace(hour=0, minute=18))
+    assert any(o.format(name='Aljho') in night for o in presence.OPENERS['night']), night
+    assert night.endswith('?') and any(x in night for x in presence.ASK_NIGHT), night
+    away = {'last_seen': (now - timedelta(days=3)).isoformat(), 'counts': {'files': 0, 'documents': 0}, 'count': 4}
+    back = presence.greeting('Aljho', {'files': 3, 'documents': {'read': 2}}, planner, calendar, now, away)
+    assert "It's been 3 days" in back and '2 new documents' in back, back
+    soon = {'last_seen': (now - timedelta(minutes=40)).isoformat(), 'counts': {'files': 1, 'documents': 0}, 'count': 9}
+    assert any(o.format(name='Aljho') in presence.greeting('Aljho', brain.status(), planner, calendar, now, soon) for o in presence.BACK_SOON)
+    nameless = presence.greeting('', {}, planner, calendar, now)
+    assert '{name}' not in nameless and ' ,' not in nameless and not nameless.startswith(' '), nameless
+    # Fresh wording: across several visits the opener changes rather than repeating word for word.
+    memory, openers = {}, []
+    for i in range(4):
+        when = now + timedelta(days=i)
+        text = presence.greeting('Aljho', brain.status(), planner, calendar, when, memory)
+        openers.append(re.split(r'(?<=[.?!])\s+', text)[0])
+        memory = presence.remember(memory, brain.status(), when, presence.greeting.last_used)
+    assert len(set(openers)) >= 2, openers
+    planner2 = Planner(tmp / 'data2')
+    clear = presence.greeting('Aljho', {}, planner2, CalendarStore(tmp / 'data2'), now)
+    assert 'list is clear' in clear, clear
+    checks.append(f'Greeting feels alive: fits the moment, names what matters, notices time away and new documents, ends with a question, never repeats itself word for word: “{g}” / “{back}”')
 
     chat = honesty.for_job({'question': 'Give me a tip for focus'})
     assert 'general knowledge' in chat[0]

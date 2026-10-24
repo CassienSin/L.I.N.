@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "checks": [
+    "Settings · Brain shows Ask me first, Sonnet, “Signed in with your Claude plan” and exactly what Claude can see; the chip reads “+ Claude”",
+    "“Send to Claude?” shows the exact text that would be sent; a quick click sends nothing",
+    "Holding Send streams Claude’s answer into Lin’s voice, with a Sent to Claude card (the exact text) and “Claude saw only the text on this card”",
+    "“Answer on this PC” answers with the local brain and sends nothing to Claude",
+    "“Claude for conversation” sends everyday questions straight to Claude; the card shows the last exchange was included",
+    "“What tasks are left?” is still answered from your saved tasks on this PC",
+    "In a private conversation, “ask Claude …” is refused: it stays on this PC",
+    "When the Claude usage limit is reached, Lin says so and answers on this PC; the chip turns amber",
+    "With On this PC only, “ask Claude …” answers that Claude is turned off and sends nothing"
+  ],
+  "date": "2026-10-23T18:47:37.021Z"
+}

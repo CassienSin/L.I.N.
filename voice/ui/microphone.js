@@ -2,7 +2,7 @@
  'use strict';
  // Hands-free conversation. Press the microphone once and talk; a pause ends your turn.
  // Lin never hears herself: the microphone is ignored while she thinks or speaks.
- const SILENCE_MS_DEFAULT = 700;      // quiet time that ends your turn (adjustable in About you)
+ const SILENCE_MS_DEFAULT = 700;      // quiet time that ends your turn (adjustable in Settings)
  const SPEECH_START_MS = 150;         // sound this long counts as you starting to speak
  const MAX_TURN_MS = 30000;           // longest single turn
  const QUIET_RESTART_MS = 12000;      // start a fresh recording if nothing was said for this long
@@ -127,7 +127,7 @@
    } catch (err) {
      if (run !== serial) return;
      const messages = {NotAllowedError: 'Microphone access was not granted.', SecurityError: 'This browser blocked the microphone.', NotFoundError: 'No microphone was found. Connect one and try again.', NotReadableError: 'The microphone is busy. Close other recording apps and retry.'};
-     stop((messages[err.name] || 'Could not start the microphone.') + ' Help is in About you.');
+     stop((messages[err.name] || 'Could not start the microphone.') + ' Help is in Settings.');
      $('#mic-recovery').hidden = !['NotAllowedError', 'SecurityError'].includes(err.name);
    }
  }

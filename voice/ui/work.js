@@ -21,7 +21,7 @@
    const last = steps[steps.length - 1], finished = last.text === 'Done' || job.status === 'cancelled' || job.status === 'error';
    $('#work-title').textContent = finished ? (job.status === 'cancelled' ? 'Stopped' : job.status === 'error' ? 'Something went wrong' : `Done in ${seconds(Math.round(last.at * 1000))}`) : last.state === 'waiting' ? 'Waiting for you' : 'Working on it';
    panel.dataset.state = finished ? 'done' : last.state;
-   if (finished || last.state === 'waiting') hideTimer = setTimeout(() => { panel.classList.add('leaving'); hideTimer = setTimeout(() => { panel.hidden = true; }, 400); }, finished ? 4000 : 9000);
+   if ((finished || last.state === 'waiting') && !(window.linWorkKeep && window.linWorkKeep())) hideTimer = setTimeout(() => { panel.classList.add('leaving'); hideTimer = setTimeout(() => { panel.hidden = true; }, 400); }, finished ? 4000 : 9000);
  }
  document.addEventListener('lin:job', e => { if (e.detail && e.detail.kind === 'answer') render(e.detail); });
  document.addEventListener('lin:response-cleared', () => { clearTimeout(hideTimer); panel.hidden = true; current = null; list.replaceChildren(); });

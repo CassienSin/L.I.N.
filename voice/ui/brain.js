@@ -12,7 +12,6 @@
  document.addEventListener('lin:view',e=>{
    for(const name of ['brain','planner','today','activity','tools','settings']){
      $('#'+name+'-workspace').hidden=e.detail!==name;
-     $('#view-'+name).setAttribute('aria-pressed',String(e.detail===name));
    }
    $('#view-chat').setAttribute('aria-pressed',String(!['brain','planner','today','activity','tools','settings'].includes(e.detail)));
  });

@@ -3,7 +3,7 @@
  // The command screen around the map: sheets, the day ribbon, status, presence and your profile.
  const $ = s => document.querySelector(s);
  const token = sessionStorage.getItem('lin-session-token') || '';
- const SHEETS = {brain: 'Notes and memory', planner: 'Plan my day', today: 'Today', activity: 'Activity', tools: 'Tools', settings: 'About you'};
+ const SHEETS = {brain: 'Notes and memory', planner: 'Plan my day', today: 'Today', activity: 'Activity', tools: 'Tools', settings: 'Settings'};
  let todayRevision = null, profile = null, profileName = '', lastStatus = null, actionsRevision = null, opener = null;
  async function api(path, body) {
    const r = await fetch(path, {method: body === undefined ? 'GET' : 'POST', headers: {'X-Lin-Token': token, 'Content-Type': 'application/json'}, body: body === undefined ? undefined : JSON.stringify(body)});
@@ -159,6 +159,51 @@
    try { await api('/api/brain', {mode: r.value}); $('#brain-note').textContent = brainNotes[r.value] || ''; $('#brain-state').textContent = `Switching to ${r.value}… this takes about a minute. Lin can't answer until it's done.`; }
    catch (err) { $('#brain-state').textContent = err.message; loadBrain(); }
  });
+ // Claude, when you want it: Off · Ask me first · Claude for conversation, and which Claude model.
+ const claudeRadios = () => document.querySelectorAll('input[name=claude-mode]');
+ function claudeShow(c) {
+   for (const r of claudeRadios()) r.checked = r.value === c.mode;
+   const sel = $('#claude-model');
+   if (!sel.options.length) for (const [v, l] of Object.entries(c.models || {})) { const o = document.createElement('option'); o.value = v; o.textContent = l; sel.append(o); }
+   sel.value = c.model;
+   const ok = c.plan && !c.limited, st = $('#claude-state');
+   st.classList.toggle('warn', c.mode !== 'off' && !ok);
+   st.textContent = c.limited ? `Your Claude usage limit is reached${c.limited_until ? `, until about ${c.limited_until}` : ''}. Lin answers on this PC until then.`
+     : !c.checked ? 'Lin hasn’t checked Claude Code yet. Press Check again.'
+     : c.installed === false ? 'Claude Code isn’t installed on this PC. Run design\Install-ClaudeCode.cmd, then sign in with your Claude account when it asks.'
+     : `${c.version ? c.version.replace(/\s*\(Claude Code\)/, '') + ' · ' : ''}${c.message}`;
+   $('#claude-week').textContent = c.sent_this_week ? `Sent to Claude this week: ${c.sent_this_week} question${c.sent_this_week === 1 ? '' : 's'}.` : '';
+ }
+ async function loadClaude() { try { claudeShow(await api('/api/claude')); } catch (err) { $('#claude-state').textContent = err.message; } }
+ async function saveClaude(body) {
+   try { claudeShow(await api('/api/claude', body)); } catch (err) { $('#claude-state').textContent = err.message; loadClaude(); }
+ }
+ for (const r of claudeRadios()) r.addEventListener('change', () => { if (r.checked) saveClaude({mode: r.value}); });
+ $('#claude-model').addEventListener('change', e => saveClaude({model: e.target.value}));
+ $('#claude-check').addEventListener('click', async () => {
+   const b = $('#claude-check'); b.disabled = true; $('#claude-state').textContent = 'Checking Claude Code…';
+   try { claudeShow(await api('/api/claude/check', {})); } catch (err) { $('#claude-state').textContent = err.message; }
+   finally { b.disabled = false; }
+ });
+ document.addEventListener('lin:view', e => { if (e.detail === 'settings') loadClaude(); });
+ loadClaude();
+ // How Lin says words: "word = how to say it", one per line, saved on this PC.
+ async function loadWords() {
+   try { const d = await api('/api/pronounce'); $('#pron-text').value = Object.entries(d.words || {}).map(([w, say]) => `${w} = ${say}`).join('\n'); } catch {}
+ }
+ $('#pron-save').addEventListener('click', async () => {
+   const b = $('#pron-save'); b.disabled = true;
+   try { const d = await api('/api/pronounce', {text: $('#pron-text').value}); const n = Object.keys(d.words || {}).length; $('#pron-status').textContent = `Saved ${n} word${n === 1 ? '' : 's'}. Lin uses them from her next sentence.`; }
+   catch (err) { $('#pron-status').textContent = err.message; }
+   finally { b.disabled = false; }
+ });
+ $('#pron-test').addEventListener('click', () => {
+   const list = $('#pron-text').value.split('\n').map(l => l.split('=')[0].trim()).filter(Boolean);
+   if (!list.length) { $('#pron-status').textContent = 'Add a word first, then press Save.'; return; }
+   document.dispatchEvent(new CustomEvent('lin:say', {detail: {text: ('Here is how I say them: ' + list.join(', ') + '.').slice(0, 600)}}));
+   $('#pron-status').textContent = 'Listening uses the saved list, so press Save first if you changed it.';
+ });
+ document.addEventListener('lin:view', e => { if (e.detail === 'settings') loadWords(); });
  let wasSwitching = false;
  document.addEventListener('lin:status', e => {
    const sw = e.detail.reasoning?.switching;
@@ -175,7 +220,7 @@
  greetVoice.addEventListener('change', () => store.set('lin-greet-voice', greetVoice.checked ? 'on' : 'off'));
  document.addEventListener('lin:status', async e => {
    const s = e.detail;
-   if (greeted || !s.ready || !s.reasoning?.ready || s.busy) return;
+   if (greeted || !s.ready || !s.reasoning?.ready || s.busy || document.documentElement.dataset.shell) return;  // only the main window greets
    greeted = true;
    let seen = false; try { seen = sessionStorage.getItem(greetKey) === '1'; } catch {}
    try {

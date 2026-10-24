@@ -55,6 +55,28 @@ def for_job(job):
         out.append('Only this file was read. Your other notes, tasks and calendar were not checked.')
         if (job.get('verification') or '').startswith('replaced'):
             out.append('Lin could not write an answer, so you heard the closest passage instead.')
+    elif c and c.get('tool') == 'conversations':
+        period, topic = c.get('period'), c.get('topic')
+        out.append('Only our saved conversations' + (f' from {period}' if period else '') + ' were searched'
+                   + (f', for “{topic}”' if topic else '') + '. Your notes, tasks and calendar were not checked.')
+        if c.get('items'):
+            gaps = missing(question, [i.get('question', '') + ' ' + i.get('answer', '') for i in c['items']])
+            gaps = [g for g in gaps if g not in ('talk', 'talked', 'discussed', 'conversation', 'said', 'yesterday')]
+            if gaps:
+                out.append(f'None of those turns mention {quote(gaps)}.')
+        if c.get('private'):
+            out.append('Conversations you kept private were never saved, so they could not be searched.')
+        if (job.get('verification') or '').startswith('replaced'):
+            out.append('Lin could not write an answer, so you heard the closest saved turn instead.')
+    elif c and c.get('tool') == 'claude':
+        if c.get('fallback') and not c.get('partial'):
+            out.append(c['fallback'] + " So Lin answered on this PC from her general knowledge. Your notes, tasks and calendar were not checked.")
+        else:
+            if c.get('partial'):
+                out.append(f"Claude stopped partway ({c.get('fallback') or 'it did not finish'}). You heard what it had said so far.")
+            out.append('Claude saw only the text on this card. It did not see your notes, memories, tasks, calendar or files, '
+                       'and it did not browse the web.')
+            out.append("Claude can be wrong or out of date, and Lin did not check this answer.")
     elif c and c.get('tool') == 'mcp':
         out.append(f"Only {c.get('name')}'s output was used. Lin can't confirm that it is correct.")
     elif c:
@@ -81,8 +103,12 @@ def for_job(job):
         verification = job.get('verification') or ''
         if verification.startswith('replaced'):
             out.append("Lin's own wording did not match the data, so you heard the exact summary instead.")
+    elif job.get('action') and job['action'].get('tool') == 'send_to_claude':
+        out.append('Nothing has been sent to Claude. It waits for you, and only the text on the card would be sent.')
     elif job.get('action'):
         out.append('Nothing has changed yet. It waits for your approval.')
+    elif (job.get('decision') or {}).get('tool') in ('privacy', 'forget_conversations', 'claude_unavailable'):
+        pass
     elif job.get('proposal'):
         out.append('Nothing is saved until you press Save memory.')
     else:

@@ -17,6 +17,7 @@ let browser;
   const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];await page.addInitScript(()=>{try{localStorage.setItem('lin-greet-voice','off')}catch{}});page.on('pageerror',e=>errors.push(e.message));
   await page.goto(session.url);await idle();
   await page.waitForFunction(()=>window.linMap&&window.linMap.stats().nodes>10,null,{timeout:60000});
+  await page.locator('#view-map').click();await page.waitForFunction(()=>document.body.dataset.view==='map');  // fly-to-source happens on the Map
   const graph=await api('/api/graph');
   async function ask(text,mode){step('asking: '+text);await idle();await page.waitForFunction(()=>!document.querySelector('#ask').disabled,null,{timeout:120000});
     await page.locator('#request-mode').selectOption(mode);await page.locator('#request-input').fill(text);await page.locator('#ask').click();}

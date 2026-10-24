@@ -1,7 +1,7 @@
 {
   "passed": true,
   "checks": [
-    "Greeting uses real counts and the time of day: \u201cGood evening, Aljho. Lin Brain has 1 note and 1 memory. You have 2 open tasks, 1 high priority.\u201d",
+    "Greeting feels alive: fits the moment, names what matters, notices time away and new documents, ends with a question, never repeats itself word for word: \u201cEvening, Aljho. The big one on your list is still Finish slides. Shall we make time for it?\u201d / \u201cWelcome back, Aljho. It's been 3 days since we last talked. I read 2 new documents while you were away. Finish slides is still waiting, and it's high priority. Shall we make time for it?\u201d",
     "\u201cWhat I couldn\u2019t check\u201d comes from what was actually looked at: general knowledge, saved facts, unmatched words, missing calendar, cut lists, replaced wording and tool output",
     "Save to brain is a proposal with an editable title; edits void the earlier approval; it writes a new note (never overwrites), the note is searchable at once, Undo removes it, and an edited note is never deleted"
   ]

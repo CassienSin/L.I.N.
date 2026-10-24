@@ -50,6 +50,36 @@ setTimeout(()=>{step('Timed out after 15 minutes');process.exit(2);},15*60*1000)
   (m=>{step('passed: '+m);return checks.push(m);})(`Map shows ${stats.nodes} items and ${stats.edges} connections from /api/graph; every connection has a kind and a reason${status.demo?'; demo badge visible':''}`);
   await page.screenshot({path:path.join(root,'design/command-desktop.png')});
 
+  // Orbit: Lin opens on Home with her emblem; the map is a quiet constellation behind it until you open Map.
+  assert.equal(await page.evaluate(()=>document.body.dataset.view),'home','Lin opens on Home');
+  assert.equal(await page.locator('#view-home').getAttribute('aria-current'),'page');
+  assert.ok(await page.locator('#orb svg').count(),'the emblem is drawn');
+  assert.equal(await page.evaluate(()=>window.linEmblem.mood()),'ready');
+  await page.evaluate(()=>{document.body.dataset.presence='needs-you';});await page.waitForFunction(()=>window.linEmblem.mood()==='waiting');
+  await page.evaluate(()=>{delete document.body.dataset.presence;});await page.waitForFunction(()=>window.linEmblem.mood()==='ready');
+  const open=(await api('/api/planner')).tasks.filter(t=>!t.done).length;
+  await page.waitForFunction(n=>document.querySelector('#home-task-count').textContent===String(n),open,{timeout:15000});
+  assert.equal(await page.evaluate(()=>getComputedStyle(document.querySelector('#map-canvas')).pointerEvents),'none','the map behind Home does not take clicks');
+  await page.screenshot({path:path.join(root,'design/orbit-home-dark.png')});
+  await page.evaluate(()=>window.linTheme.set('theme','light'));
+  assert.equal(await page.evaluate(()=>document.documentElement.dataset.themeResolved),'light');
+  assert.equal(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor),'rgb(242, 245, 247)','light (blueprint) theme');
+  await page.waitForTimeout(800);await page.screenshot({path:path.join(root,'design/orbit-home-light.png')});
+  await page.evaluate(()=>window.linTheme.set('motion','calm'));
+  const a1=await page.locator('#orb svg g').nth(2).getAttribute('transform');await page.waitForTimeout(400);
+  assert.equal(await page.locator('#orb svg g').nth(2).getAttribute('transform'),a1,'calm motion holds the emblem still');
+  await page.evaluate(()=>{window.linTheme.set('motion','full');window.linTheme.set('theme','dark');});
+  // The day ring is a slider: arrow keys look at other times and say what's on; Enter opens Today.
+  await page.locator('#day-ring').focus();await page.keyboard.press('Home');const t0=await page.locator('#day-ring').getAttribute('aria-valuetext');
+  await page.keyboard.press('End');const t1=await page.locator('#day-ring').getAttribute('aria-valuetext');assert.notEqual(t0,t1,'the day ring moves with the keyboard');
+  await page.keyboard.press('Enter');await page.locator('#sheet').waitFor({state:'visible'});assert.equal(await page.locator('#sheet-title').textContent(),'Today');
+  await page.keyboard.press('Escape');await page.locator('#sheet').waitFor({state:'hidden'});
+  assert.deepEqual(await page.evaluate(()=>window.linSounds.names),['startup','listen','send','approve','attention','seeing','blocked']);
+  await page.locator('#view-map').click();
+  await page.waitForFunction(()=>document.body.dataset.view==='map'&&getComputedStyle(document.querySelector('#map-canvas')).opacity==='1',null,{timeout:5000});
+  assert.equal(await page.locator('#view-map').getAttribute('aria-current'),'page');
+  (m=>{step('passed: '+m);return checks.push(m);})(`Orbit: opens on Home with the live emblem (mood follows Lin, amber while a change waits), ${open} open tasks beside it; light theme and calm motion work; the day ring answers “what’s on at…” from the keyboard; Map opens the full map`);
+
   // Inspector, reasons and path tracing.
   await page.locator('#hub-list button').first().click();
   await page.waitForFunction(()=>!document.querySelector('#inspector-focus').hidden);
@@ -94,13 +124,14 @@ setTimeout(()=>{step('Timed out after 15 minutes');process.exit(2);},15*60*1000)
   (m=>{step('passed: '+m);return checks.push(m);})(`2,000 items, ${bench.edges} connections: physics plus drawing ${bench.median_ms} ms per frame (median), ${bench.p95_ms} ms (95th)`);
 
   // Sheets keep the existing workspaces.
-  for(const [button,title] of [['#view-today','Today'],['#view-planner','Plan my day'],['#view-brain','Notes and memory'],['#view-activity','Activity'],['#view-settings','About you']]){
+  for(const [button,title] of [['#view-today','Today'],['#view-planner','Plan my day'],['#view-brain','Notes and memory'],['#view-activity','Activity'],['#view-settings','Settings']]){
     await page.locator(button).click();await page.locator('#sheet').waitFor({state:'visible'});assert.equal(await page.locator('#sheet-title').textContent(),title);
-    if(title==='About you'){await page.waitForFunction(()=>document.querySelector('#profile-name').value.length>0);}
+    if(title==='Settings'){await page.waitForFunction(()=>document.querySelector('#profile-name').value.length>0);}
+    if(title==='Notes and memory'){await page.waitForFunction(()=>/\d+ files ·/.test(document.querySelector('#brain-status').textContent),null,{timeout:15000});assert.doesNotMatch(await page.locator('#memory-status').textContent(),/Cannot read|undefined/,'the saved-memories list loads');}
     await page.keyboard.press('Escape');await page.locator('#sheet').waitFor({state:'hidden'});
   }
   const profile=await api('/api/profile');assert.match(await page.locator('#sentences').textContent(),new RegExp(profile.name));
-  (m=>{step('passed: '+m);return checks.push(m);})('Today, Plan my day, Notes and memory, Activity and About you open as sheets and close with Escape; Lin greets you by your profile name');
+  (m=>{step('passed: '+m);return checks.push(m);})('Today, Plan my day, Notes and memory, Activity and Settings open as sheets and close with Escape; Lin greets you by your profile name');
 
   // Typed request shows Lin's words and what she checked.
   await page.waitForFunction(()=>!document.querySelector('#ask').disabled,null,{timeout:120000});
@@ -136,8 +167,8 @@ setTimeout(()=>{step('Timed out after 15 minutes');process.exit(2);},15*60*1000)
   for(const width of [390,320]){
     await page.setViewportSize({width,height:844});await page.waitForTimeout(300);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`no sideways scroll at ${width}px`);
-    const off=await page.evaluate(()=>[...document.querySelectorAll('.dock-buttons .round')].filter(b=>{const r=b.getBoundingClientRect();return r.right>innerWidth+1||r.left<-1;}).length);
-    assert.equal(off,0,`all dock buttons visible at ${width}px`);
+    const off=await page.evaluate(()=>[...document.querySelectorAll('#rail button, .dock .round')].filter(b=>{const r=b.getBoundingClientRect();return r.right>innerWidth+1||r.left<-1;}).length);
+    assert.equal(off,0,`every section and dock button visible at ${width}px`);
   }
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(root,'design/command-phone.png')});
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);

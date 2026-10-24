@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "checks": [
+    "Every exchange is saved on this PC with a short title; a reopened Lin gets the last turns back and the latest conversation to pick up",
+    "\u201cWhat did we talk about yesterday?\u201d and topic questions find the right turns; ordinary questions are not mistaken for recall",
+    "\u201cDon\u2019t save this conversation\u201d stops saving it (nothing is written); \u201cstart saving again\u201d resumes",
+    "Forgetting asks first, removes the turns from every search at once, Undo restores them for 10 minutes, then they are erased from the file",
+    "Every recall answer says which saved conversations were searched, that notes, tasks and calendar were not, and that private chats were never saved",
+    "A dated fact you mention (\u201cmy defense is on November 12\u201d) becomes a suggested memory card; questions and undated remarks do not",
+    "A quiet conversation gets a one-line summary once; it is not summarised again until something new is said"
+  ]
+}

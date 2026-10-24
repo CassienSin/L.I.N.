@@ -19,21 +19,23 @@ class Cancelled(Exception):
 
 def spoken_answer(text):
     text = re.sub(r'<think>.*?</think>', '', text, flags=re.S)
-    text = re.sub(r'[*`#]', '', text)
+    text = re.sub('[\U0001F000-\U0001FAFF\u2600-\u27BF\uFE0F\u200d]', '', re.sub(r'[*`#]', '', text))
     text = ' '.join(text.split()).strip()
     if not text:
         raise ValueError('The local model returned no answer.')
-    if len(text) > 580:
-        part = text[:580]
+    if len(text) > 1400:
+        part = text[:1400]
         sentences = list(re.finditer(r'[.!?](?:\s|$)', part))
         text = part[:sentences[-1].start()+1] if sentences else part.rsplit(' ', 1)[0]+'…'
     return text
 
 SENTENCE_END = re.compile(r'(?<!\b[ap]\.m)(?<!\be\.g)(?<!\bi\.e)[.!?]["\')\]]*\s+(?=\S)', re.I)
 
+EMOJI = re.compile('[\U0001F000-\U0001FAFF\u2600-\u27BF\uFE0F\u200d]')   # Lin speaks; emoji only clutter the caption
+
 def clean_sentence(text):
     text = re.sub(r'<think>.*?</think>', '', text, flags=re.S)
-    text = re.sub(r'[*`#]', '', text)
+    text = EMOJI.sub('', re.sub(r'[*`#]', '', text))
     return ' '.join(text.split()).strip()
 
 class LocalReasoner:
@@ -144,7 +146,7 @@ class LocalReasoner:
                     pass
 
     def answer(self, question, history, cancelled, memories=None, checked=None, instruction=None,
-               on_sentence=None, max_tokens=180):
+               on_sentence=None, max_tokens=240):
         """Generate an answer. With on_sentence, each finished sentence is handed over as soon as it
         exists so speech can start while the rest is generated; returning False stops generation."""
         started = time.perf_counter()
@@ -175,6 +177,7 @@ class LocalReasoner:
                 raise Cancelled()
             self.active = connection
         text = ''
+        finish = None
         sent = []
         consumed = 0
         stopped = False
@@ -184,7 +187,7 @@ class LocalReasoner:
             sentence = clean_sentence(sentence)
             if not sentence:
                 return
-            if sum(len(x)+1 for x in sent)+len(sentence) > 580:
+            if sum(len(x)+1 for x in sent)+len(sentence) > 1400:
                 stopped = True
                 return
             if on_sentence(sentence) is False:
@@ -214,6 +217,7 @@ class LocalReasoner:
                                              cached_tokens=t.get('cache_n'))
                 for choice in result.get('choices', []):
                     text += choice.get('delta', {}).get('content') or ''
+                    finish = choice.get('finish_reason') or finish
                 if on_sentence and not stopped:
                     while not stopped and (match := SENTENCE_END.search(text, consumed)):
                         emit(text[consumed:match.end()])
@@ -224,11 +228,16 @@ class LocalReasoner:
                 raise Cancelled()
             self.last_timings['total_ms'] = round((time.perf_counter()-started)*1000)
             if on_sentence:
-                if not stopped and text[consumed:].strip():
+                # When the answer ran out of room mid-sentence, end on the last whole sentence instead of a fragment.
+                if not stopped and text[consumed:].strip() and not (finish == 'length' and sent):
                     emit(text[consumed:])
                 if not sent:
                     raise ValueError('The local model returned no answer.')
                 return ' '.join(sent), round(time.perf_counter()-started,3)
+            if finish == 'length':
+                ends = list(re.finditer(r'[.!?](?:\s|$)', text))
+                if ends:
+                    text = text[:ends[-1].start() + 1]
             return spoken_answer(text), round(time.perf_counter()-started,3)
         finally:
             connection.close()

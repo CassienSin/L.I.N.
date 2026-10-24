@@ -54,6 +54,9 @@ try {
     Run 'Sentence streaming checks' $python @('verify_streaming.py')
     Run 'Connected tools (MCP) checks' $python @('verify_mcp.py')
     Run 'Greeting, honesty and Save to brain checks' $python @('verify_presence.py')
+    Run 'Conversation memory: saving, recall, private and forget checks' $python @('verify_conversations.py')
+    Run 'Claude through Claude Code (a stand-in; nothing is sent)' $python @('verify_claude.py')
+    Run 'Voice: what she reads, tidied audio, no cut-offs' $python @('verify_voice.py')
     Run 'Lin Brain reads documents (PDF, Word, PowerPoint, Excel, photos)' $python @('verify_docs.py')
     Run 'Notes regression' $python @('verify_brain.py')
     Run 'Planner regression' $python @('verify_planner.py')
@@ -67,6 +70,9 @@ try {
         for ($i = 0; $i -lt 60 -and (Get-Process -Id $old.Pid -ErrorAction SilentlyContinue); $i++) { Start-Sleep -Milliseconds 500 }
         Log "Stopped the running Lin (pid $($old.Pid)) so the checks use the latest code."
     } catch { Log 'Lin was not running.' }
+    # Demo Lin answers "Claude" questions with voice/claude_stand_in.py, so the checks never use your Claude plan.
+    $env:LIN_CLAUDE_STAND_IN_FILE = Join-Path $runtime 'claude-stand-in.txt'
+    Set-Content -LiteralPath $env:LIN_CLAUDE_STAND_IN_FILE -Value 'ok'
     Log 'Starting Lin with demo data…'
     & (Join-Path $root 'Start-LinVoice.ps1') -Demo -NoBrowser | ForEach-Object { Log $_ }
     Wait-Ready 'Demo Lin' | Out-Null
@@ -75,9 +81,12 @@ try {
     RunNode 'Connected tools in the browser (demo data)' (Join-Path $root 'design/verify-tools.cjs')
     RunNode 'Fly-to-source on the map (demo data)' (Join-Path $root 'design/verify-fly.cjs')
     RunNode 'Work panel, greeting and Save to brain in the browser (demo data)' (Join-Path $root 'design/verify-presence.cjs')
+    RunNode 'Conversation memory in the browser (demo data)' (Join-Path $root 'design/verify-memory.cjs')
+    RunNode 'Claude as the online brain in the browser (demo data, stand-in)' (Join-Path $root 'design/verify-claude.cjs')
     RunNode 'Documents in Lin Brain and the Google preset (demo data)' (Join-Path $root 'design/verify-docs.cjs')
     RunNode 'Fast and Smart brain switch (demo data)' (Join-Path $root 'design/verify-brain-switch.cjs')
 
+    Remove-Item Env:LIN_CLAUDE_STAND_IN_FILE -ErrorAction SilentlyContinue
     Log 'Switching Lin back to your own data…'
     & (Join-Path $root 'Start-LinVoice.ps1') -NoBrowser | ForEach-Object { Log $_ }
     $s = Wait-Ready 'Lin with your data'

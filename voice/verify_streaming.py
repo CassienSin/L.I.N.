@@ -181,12 +181,12 @@ with tempfile.TemporaryDirectory(prefix='streaming-test-', dir=HERE / 'runtime')
     assert 'a' * 32 in server.CONVERSATIONS and server.CONVERSATIONS['a' * 32][-1]['content'] != ' '.join(SCRIPT[q])
     checks.append('Interrupting during a streamed answer stops generation and speech; the partial answer is not saved to chat history')
 
-    # 5. The eight-segment speech bound still holds when streaming.
+    # 5. The speech bound (16 sentences, so long answers are no longer cut at 8) still holds when streaming.
     q = 'Ramble on.'
-    SCRIPT[q] = [f'Point {i} matters.' for i in range(1, 12)]
+    SCRIPT[q] = [f'Point {i} matters.' for i in range(1, 20)]
     job, _ = run(q)
-    assert len(job['texts']) == 8 and job['status'] == 'complete'
-    checks.append('Streaming keeps the eight-sentence bound per spoken response')
+    assert len(job['texts']) == server.MAX_CHUNKS == 16 and job['status'] == 'complete', len(job['texts'])
+    checks.append('Streaming keeps the sixteen-sentence bound per spoken response')
 
 out = HERE / 'brain-benchmark' / 'streaming-results.json'
 out.write_text(json.dumps({'passed': True, 'checks': checks}, indent=2), encoding='utf-8')

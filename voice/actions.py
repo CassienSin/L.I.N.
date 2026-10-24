@@ -574,6 +574,13 @@ def describe(tool, payload):
         return f"Mark “{payload['title']}” as done"
     if tool == 'save_note':
         return f"Save “{payload['title']}” to Lin Brain · {payload['file']}"
+    if tool == 'forget_conversations':
+        turns, convs = payload.get('turns', 0), payload.get('conversations', 0)
+        what = f"{turns} saved turn{'s' if turns != 1 else ''}" + (f" from {convs} conversations" if convs > 1 else '')
+        return f"Forget {payload['label']} · {what} · can be undone for 10 minutes, then erased for good"
+    if tool == 'send_to_claude':
+        extra = ' and our last exchange' if payload.get('context') else ''
+        return f"Send to Claude ({payload.get('label') or 'Claude'}) · your question{extra}, nothing else"
     if tool == 'mcp':
         args = ', '.join(f'{k}: {json.dumps(v, ensure_ascii=False)}' for k, v in payload['arguments'].items())
         args = args if len(args) <= 160 else args[:159] + '…'
@@ -594,6 +601,7 @@ class ActionStore:
         self.planner = planner
         self.mcp = None  # set by the server: mcp_client.Manager
         self.brain = None  # set by the server: brain.Brain (Save to brain writes into its folder)
+        self.conversations = None  # set by the server: conversations.ConversationStore
         self.lock = threading.RLock()
         with self.db() as db:
             db.execute('''CREATE TABLE IF NOT EXISTS actions(id TEXT PRIMARY KEY, tool TEXT NOT NULL, request TEXT NOT NULL,
@@ -668,6 +676,29 @@ class ActionStore:
             return {'task_id': task['id'], 'title': task['title'], 'task_revision': task['revision']}
         if tool == 'save_note':
             return self._note_payload(args)
+        if tool == 'forget_conversations':
+            if not self.conversations:
+                raise ValueError('Conversation memory is not available right now.')
+            scope = args.get('scope')
+            if scope not in ('this', 'today', 'yesterday', 'week', 'all'):
+                raise ValueError('Choose which conversations to forget.')
+            payload = self.conversations.preview_forget(scope, args.get('conversation'))
+            if not payload['turns']:
+                raise ValueError(f"There is nothing saved from {payload['label']} to forget." if scope != 'this' else
+                                 'Nothing from this conversation is saved, so there is nothing to forget.')
+            return payload
+        if tool == 'send_to_claude':
+            import cloud_brain
+            question, text = str(args.get('question', '')).strip(), str(args.get('text', ''))
+            if not question or not text or len(text) > 4000 or '\x00' in text:
+                raise ValueError('There is nothing to send to Claude.')
+            if args.get('model') not in cloud_brain.MODELS or not re.fullmatch(r'[a-f0-9]{32}', str(args.get('conversation', ''))):
+                raise ValueError('Choose a Claude model in Settings first.')
+            context = args.get('context')
+            if context is not None and not (isinstance(context, dict) and {'question', 'answer'} <= set(context)):
+                raise ValueError('The context for Claude is not valid.')
+            return {'question': question[:1000], 'text': text, 'context': context, 'conversation': args['conversation'],
+                    'model': args['model'], 'label': cloud_brain.MODELS[args['model']]}
         if tool == 'mcp':
             import mcp_client
             server, name = str(args.get('server', '')), str(args.get('tool', ''))
@@ -697,7 +728,7 @@ class ActionStore:
         return {'title': title, 'body': body, 'file': f'{NOTE_FOLDER}/{name}'}
 
     def propose(self, tool, args, request):
-        if tool not in WRITE_TOOLS and tool not in ('mcp', 'save_note'):
+        if tool not in WRITE_TOOLS and tool not in ('mcp', 'save_note', 'forget_conversations', 'send_to_claude'):
             raise ValueError('Only listed changes can be proposed.')
         payload = self.prepare(tool, args)
         action_id = secrets.token_hex(16)
@@ -802,6 +833,14 @@ class ActionStore:
             digest = hashlib.sha256(text.encode('utf-8')).hexdigest()
             self.brain.scan()
             return {'path': payload['file'], 'verified': True}, {'file': payload['file'], 'sha256': digest}
+        if tool == 'forget_conversations':
+            batch = secrets.token_hex(8)
+            forgotten = self.conversations.forget(payload, batch)
+            left = self.conversations.preview_forget(payload['scope'], payload.get('conversation'))
+            return {'forgotten': forgotten, 'left': left['turns'], 'verified': left['turns'] == 0}, {'batch': batch}
+        if tool == 'send_to_claude':
+            # Approving only unlocks one send of exactly this text; Lin sends it when the answer starts (see consume).
+            return {'approved': True, 'used': False}, None
         if tool == 'mcp':
             import mcp_client
             if not self.mcp:
@@ -813,12 +852,42 @@ class ActionStore:
             return {'text': text, 'verified': False}, None
         raise ValueError('Unknown change.')
 
+    def consume(self, action_id, conversation, within=600):
+        """Use an approved "Send to Claude?" once: returns its payload, or raises Conflict."""
+        with self.db() as db:
+            row = db.execute('SELECT * FROM actions WHERE id=?', (action_id,)).fetchone()
+            if not row or row['tool'] != 'send_to_claude' or row['state'] != 'executed':
+                raise Conflict('That approval is not open. Ask again.')
+            result = json.loads(row['result'] or '{}')
+            if result.get('used'):
+                raise Conflict('That question was already sent to Claude.')
+            payload = json.loads(row['payload'])
+            if payload.get('conversation') != conversation:
+                raise Conflict('That approval belongs to another conversation.')
+            try:
+                age = (datetime.now(timezone.utc) - datetime.fromisoformat(row['decided_at'])).total_seconds()
+            except (TypeError, ValueError):
+                age = within + 1
+            if age > within:
+                raise Conflict('That approval is more than 10 minutes old. Ask again.')
+            db.execute('UPDATE actions SET result=? WHERE id=?', (json.dumps({**result, 'used': True}), action_id))
+            self._bump(db)
+            return payload
+
     def undo(self, action_id):
         with self.db() as db:
             row = db.execute('SELECT * FROM actions WHERE id=?', (action_id,)).fetchone()
             if not row or row['state'] != 'executed' or not row['undo']:
                 raise Conflict('This change cannot be undone.')
         undo = json.loads(row['undo'])
+        if row['tool'] == 'forget_conversations':
+            restored = self.conversations.restore(undo['batch'])
+            if restored is None:
+                raise Conflict('It has been more than 10 minutes, so those conversations are already erased for good.')
+            with self.db() as db:
+                db.execute("UPDATE actions SET state='undone', undo=NULL WHERE id=?", (action_id,))
+                self._bump(db)
+            return self.get(action_id)
         if row['tool'] == 'save_note':
             path = Path(self.brain.folder) / undo['file']
             if not path.exists():
@@ -848,7 +917,7 @@ class ActionStore:
 
 
 def proposal_answer(action, reminder=False):
-    text = f"I've prepared this for you to approve: {action['description'].replace(' · ', ', ')}. Nothing changes until you press Approve."
+    text = f"I've prepared this for you to approve: {action['description'].replace(' · ', ', ')}. Nothing changes until you approve it."
     if reminder:
         text += ' I cannot send reminders yet, so this becomes a task.'
     return text
@@ -862,11 +931,16 @@ def tool_result_answer(tool, text):
 
 
 def receipt_answer(action):
+    if action['tool'] == 'send_to_claude':
+        return None if action['state'] == 'executed' else (action.get('note') or 'Nothing was sent to Claude.')
     if action['state'] == 'executed' and action['tool'] == 'save_note':
         return "Saved. It's in Lin Brain under Saved answers, and it's on your map now."
     if action['state'] == 'executed' and action['tool'] == 'mcp':
         return 'Done. ' + tool_result_answer(action['payload']['tool'], (action.get('result') or {}).get('text', ''))
     if action['state'] == 'executed':
+        if action['tool'] == 'forget_conversations':
+            n = (action.get('result') or {}).get('forgotten', 0)
+            return f"Done. I've forgotten {n} saved turn{'s' if n != 1 else ''} from {action['payload']['label']}. You can undo it for the next 10 minutes."
         return {'add_task': f"Done. {action['payload']['title']} is on your task list.",
                 'complete_task': f"Done. {action['payload']['title']} is marked complete."}[action['tool']]
     return action.get('note') or 'That change was not made.'

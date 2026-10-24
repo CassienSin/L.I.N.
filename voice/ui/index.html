@@ -4,10 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Lin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%279.5%27 fill=%27none%27 stroke=%27%234FF3FF%27 stroke-width=%271.6%27 stroke-dasharray=%2711 3.9%27/%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%274.4%27 fill=%27%234FF3FF%27/%3E%3Cellipse cx=%2712%27 cy=%2712%27 rx=%2711.2%27 ry=%273.4%27 fill=%27none%27 stroke=%27%234FF3FF%27 stroke-width=%271.3%27 transform=%27rotate(-24 12 12)%27/%3E%3C/svg%3E">
+<script src="/theme.js"></script>
 <link rel="stylesheet" href="/tidepool.css">
 <link rel="stylesheet" href="/planner.css">
 <link rel="stylesheet" href="/today.css">
 <link rel="stylesheet" href="/actions.css">
+<link rel="stylesheet" href="/orbit.css">
 <script src="/app.js" defer></script>
 <script src="/microphone.js" defer></script>
 <script src="/brain.js" defer></script>
@@ -18,17 +21,47 @@
 <script src="/actions.js" defer></script>
 <script src="/tools.js" defer></script>
 <script src="/work.js" defer></script>
+<script src="/shell.js"></script>
+<script src="/emblem.js" defer></script>
+<script src="/home.js" defer></script>
+<script src="/sounds.js" defer></script>
 </head>
-<body data-state="ready">
+<body data-state="ready" data-view="home">
 <main id="lin-voice">
  <canvas id="map-canvas" tabindex="0" aria-label="Map of everything Lin knows. Drag to move, scroll to zoom, select an item to inspect it, Shift and select a second item to trace a path. A list of items is in the inspector."></canvas>
  <div id="map-pulse-note" class="visually-hidden" role="status"></div>
 
  <header class="topbar">
-  <div class="brandline"><span class="wordmark">Lin</span><span id="demo-badge" class="demo-badge" hidden>Demo data</span></div>
+  <div class="brandline"><svg class="brand-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="11 3.9"></circle><circle cx="12" cy="12" r="4.4" fill="currentColor"></circle><ellipse cx="12" cy="12" rx="11.2" ry="3.4" fill="none" stroke="currentColor" stroke-width="1.3" transform="rotate(-24 12 12)"></ellipse></svg><span class="wordmark">Lin</span><span id="demo-badge" class="demo-badge" hidden>Demo data</span></div>
+  <p id="home-date" class="home-date readout"></p>
   <div id="day-ribbon" class="day-ribbon" role="img" aria-label="Loading today’s calendar"><div class="ribbon-track"></div><div id="ribbon-items"></div><div id="ribbon-now" class="ribbon-now" hidden></div><div id="ribbon-hours" class="ribbon-hours"></div><button id="ribbon-label" class="ribbon-label" type="button">Loading today…</button></div>
-  <div class="status-chips"><span class="chip"><span class="dot live"></span>On this computer</span><span id="voice-chip" class="chip">Starting…</span></div>
+  <div class="status-chips"><span id="place-chip" class="chip"><span class="dot live"></span><span id="place-text">On this PC</span></span><span id="brain-chip" class="chip">Brain · Fast</span><span id="voice-chip" class="chip">Starting…</span><button id="lens-open" class="round lens-open" type="button" aria-label="Map filters"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"></path></svg></button></div>
  </header>
+
+ <nav id="rail" class="rail" aria-label="Lin sections">
+  <button id="view-home" type="button" data-view="home" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="11 3.9"></circle><circle cx="12" cy="12" r="4.4" fill="currentColor"></circle><ellipse cx="12" cy="12" rx="11.2" ry="3.4" fill="none" stroke="currentColor" stroke-width="1.3" transform="rotate(-24 12 12)"></ellipse></svg><span>Home</span></button>
+  <button id="view-map" type="button" data-view="map"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="7" r="2.3"></circle><circle cx="18" cy="6" r="2.3"></circle><circle cx="12" cy="17" r="2.3"></circle><path d="M8.2 8.3l2.6 6.6M15.9 7.6l-2.7 7.2M8.3 7h7.4"></path></svg><span>Map</span></button>
+  <button id="view-today" type="button" data-sheet="today"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16a8 8 0 1 1 16 0"></path><path d="M12 16l4-5"></path></svg><span>Today</span></button>
+  <button id="view-planner" type="button" data-sheet="planner"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"></path><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"></path></svg><span>Plan</span></button>
+  <button id="view-brain" type="button" data-sheet="brain"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg><span>Notes</span></button>
+  <button id="view-activity" type="button" data-sheet="activity"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h4l2-6 4 12 2-6h4"></path></svg><span>Activity</span></button>
+  <button id="view-tools" type="button" data-sheet="tools"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0z"></path><path d="M12 16v5"></path></svg><span>Tools</span></button>
+  <button id="view-settings" type="button" data-sheet="settings"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg><span>Settings</span></button>
+ </nav>
+
+ <aside id="home-tasks" class="home-side left" aria-label="Open tasks">
+  <div class="stat"><span id="home-task-count" class="stat-num">–</span><span class="stat-label readout">Open tasks</span></div>
+  <div class="home-rule"></div>
+  <ul id="home-task-list" class="home-list"></ul>
+  <button id="home-open-plan" class="link-button" type="button">Plan my day →</button>
+ </aside>
+ <aside id="home-brain" class="home-side right" aria-label="Lin Brain">
+  <div class="stat"><span class="stat-label readout">In Lin Brain</span><span id="home-brain-count" class="stat-num">–</span></div>
+  <div class="home-rule"></div>
+  <p id="home-brain-detail" class="home-note">Reading your notes…</p>
+  <p id="home-brain-reading" class="home-note muted" hidden></p>
+  <button id="home-open-map" class="link-button" type="button">Open the map →</button>
+ </aside>
 
  <aside id="inspector" class="float-panel inspector" aria-label="Inspector">
   <label class="field-label" for="map-search">Find anything</label>
@@ -68,6 +101,9 @@
 
  <aside id="work-panel" class="work-panel" hidden aria-live="polite" aria-label="What Lin is doing"><div class="work-head"><span id="work-title">Working on it</span><button id="work-close" type="button" aria-label="Hide the steps">×</button></div><ol id="work-steps"></ol></aside>
  <section class="conversation" aria-label="Conversation with Lin">
+  <div id="presence" class="presence"><svg id="day-ring" class="day-ring" aria-hidden="true"></svg><div id="orb" class="emblem" role="img" aria-label="Lin"></div></div>
+  <p id="voice-state" class="voice-state readout" role="status">READY WHEN YOU ARE</p>
+  <ul id="boot" class="boot readout" aria-hidden="true"></ul>
   <div id="caption" class="caption">
    <div class="caption-head"><p id="request-echo" hidden></p><button id="caption-hide" class="caption-hide" type="button" aria-expanded="true">Hide</button></div>
    <div id="caption-body" class="caption-body">
@@ -80,8 +116,6 @@
    </div>
   </div>
   <div class="dock">
-   <div id="orb" class="pearl" role="img" aria-label="Lin"><span class="pearl-ring r2"></span><span class="pearl-ring r1"></span><span class="pearl-arc"></span><span class="pearl-core"></span><span class="mic-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div>
-   <span id="voice-state" class="visually-hidden" role="status">READY WHEN YOU ARE</span>
    <form id="ask-form" class="ask-form">
     <label class="visually-hidden" for="request-input">Ask Lin</label>
     <input id="request-input" maxlength="1000" placeholder="Ask Lin…" autocomplete="off" required>
@@ -90,24 +124,15 @@
     <select id="request-mode" class="mode-select" title="How Lin answers"><option value="chat">Lin</option><option value="brain">Exact notes</option></select>
     <button id="ask" class="send" type="submit" aria-label="Send to Lin" disabled><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"></path></svg></button>
    </form>
-   <div class="dock-buttons">
-    <button id="record" class="round talk" type="button" aria-label="Talk hands-free" aria-pressed="false" disabled><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></button>
-    <label class="round mute" title="Mute Lin"><input id="mute" type="checkbox"><span class="visually-hidden">Mute Lin</span><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path class="sound" d="M17 9.5a3.5 3.5 0 0 1 0 5"></path><path class="cross" d="M16 9l5 6M21 9l-5 6"></path></svg></label>
-    <button id="view-today" class="round" type="button" aria-label="Today" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M5 19l1.4-1.4M17.6 6.4 19 5"></path></svg></button>
-    <button id="view-planner" class="round" type="button" aria-label="Plan my day" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"></path><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"></path></svg></button>
-    <button id="view-brain" class="round" type="button" aria-label="Notes and memory" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg></button>
-    <button id="view-activity" class="round" type="button" aria-label="Activity" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>
-    <button id="view-tools" class="round" type="button" aria-label="Tools" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0z"></path><path d="M12 16v5"></path></svg></button>
-    <button id="view-settings" class="round" type="button" aria-label="About you and settings" aria-pressed="false"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></button>
-    <button id="lens-open" class="round lens-open" type="button" aria-label="Map filters"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"></path></svg></button>
-   </div>
+   <button id="record" class="round talk" type="button" aria-label="Talk hands-free" aria-pressed="false" disabled><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></button>
+   <label class="round mute" title="Mute Lin"><input id="mute" type="checkbox"><span class="visually-hidden">Mute Lin</span><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path class="sound" d="M17 9.5a3.5 3.5 0 0 1 0 5"></path><path class="cross" d="M16 9l5 6M21 9l-5 6"></path></svg></label>
   </div>
   <p id="mic-status" class="mic-status" role="status">Loading local English recognition…</p>
  </section>
 
  <div id="sheet-scrim" class="sheet-scrim" hidden></div>
  <div id="sheet" class="sheet" hidden role="dialog" aria-modal="false" aria-labelledby="sheet-title">
-  <div class="sheet-head"><h1 id="sheet-title" class="sheet-title">Lin</h1><button id="view-chat" type="button" aria-pressed="true">Back to the map</button></div>
+  <div class="sheet-head"><h1 id="sheet-title" class="sheet-title">Lin</h1><button id="view-chat" type="button" aria-pressed="true">Close</button></div>
   <div class="sheet-body">
 
  <section id="brain-workspace" class="brain-workspace" hidden aria-label="Notes and memory">
@@ -151,16 +176,38 @@
 
  <section id="settings-workspace" hidden aria-label="About you and settings">
   <div class="settings-grid">
+   <section class="panel"><h2>Look</h2><p>How Lin looks on this PC. Saved in this browser only.</p>
+    <fieldset class="look-set"><legend class="field-label">Theme</legend><div class="look-choice" role="radiogroup" aria-label="Theme"><label><input type="radio" name="look-theme" value="dark"> Dark</label><label><input type="radio" name="look-theme" value="light"> Light (blueprint)</label><label><input type="radio" name="look-theme" value="system"> Match Windows</label></div></fieldset>
+    <label class="check-row"><input id="look-contrast" type="checkbox"> High contrast</label>
+    <label class="check-row"><input id="look-motion" type="checkbox"> Calm motion: the emblem holds still and nothing animates</label>
+    <label class="check-row"><input id="look-captions" type="checkbox"> Large captions: Lin’s words stay on screen in bigger, high-contrast text, and can’t be tucked away</label>
+    <label class="check-row"><input id="look-sounds" type="checkbox" checked> Lin’s sounds: a chime when she listens, a soft hum while she thinks, a click when you approve</label>
+    <div class="brain-actions"><button id="look-sound-test" type="button">Play the listening chime</button></div>
+    <p class="small-note">Calm motion also turns on by itself when Windows is set to reduce animations.</p></section>
    <section class="panel"><h2>About you</h2><p>Lin reads this before every answer. It stays on this computer.</p><form id="profile-form"><label for="profile-name">What Lin calls you</label><input id="profile-name" maxlength="40" required><label for="profile-about">About you</label><textarea id="profile-about" maxlength="600" rows="5" required></textarea><label for="profile-tone">How Lin should talk to you</label><textarea id="profile-tone" maxlength="300" rows="3" required></textarea><div class="brain-actions"><button id="profile-save" class="primary" type="submit">Save profile</button></div></form><p id="profile-status" role="status"></p></section>
-   <section class="panel"><h2>Brain</h2><p>Lin always thinks on this computer. Choose which brain she uses.</p>
+   <section class="panel"><h2>Brain</h2><p>Lin thinks on this computer. Choose which local brain she uses.</p>
     <div class="brain-choice" role="radiogroup" aria-label="Brain">
      <label class="check-row"><input type="radio" name="brain-mode" value="fast"> <span><strong>Fast</strong> · Qwen3 4B on the processor</span></label>
      <label class="check-row"><input type="radio" name="brain-mode" value="smart"> <span><strong>Smart</strong> · Qwen3.6 35B, also uses the graphics card</span></label>
     </div>
     <p id="brain-note" class="small-note"></p>
     <p class="small-note">Measured on this laptop: written answers start speaking in about 6–8 seconds with either brain. With Smart, simple answers such as “what tasks are left?” take about 5–8 seconds instead of 2, because the voice shares the 4 GB graphics card.</p>
-    <p id="brain-state" class="small-note" role="status"></p></section>
-   <section class="panel"><h2>Talking hands-free</h2><p>Press the microphone once and talk. Lin sends your words after a short pause, stops listening while she speaks, and listens again when she’s done. Press it again, or Escape, to stop. Space interrupts her.</p><label class="check-row"><input id="mic-review" type="checkbox"> Let me review what Lin heard before sending</label><label class="slider">Pause before sending <output id="silence-value">0.7 s</output><input id="silence-ms" type="range" min="500" max="2000" step="100" value="700"></label><p id="mic-timer" class="small-note">Up to 30 seconds per turn.</p><div id="mic-recovery" hidden><p>Your browser or Windows may be blocking the microphone. Open Lin in your regular browser and allow the microphone when asked.</p><button id="open-browser" type="button">Open Lin in browser</button><p>If it is still blocked, check the site’s microphone permission and Windows microphone privacy settings.</p></div><button id="discard" type="button" hidden>Discard recording</button><div id="transcript-panel" hidden><label for="transcript">What Lin heard</label><textarea id="transcript" rows="2" maxlength="2000"></textarea><button id="use-transcript" type="button">Use as my request</button></div><p class="small-note">Microphone: <span id="mic-indicator">off</span>. Speech is transcribed on this computer.</p></section>
+    <p id="brain-state" class="small-note" role="status"></p>
+    <div class="claude-set">
+     <h3 id="claude-heading">Claude, when you want it</h3>
+     <p class="small-note">Claude is online. Lin reaches it only through Claude Code on this PC, signed in with your own Claude plan. Her voice, her hearing and your notes, tasks and calendar always stay here.</p>
+     <div class="brain-choice" role="radiogroup" aria-labelledby="claude-heading">
+      <label class="check-row"><input type="radio" name="claude-mode" value="off"> <span><strong>On this PC only</strong> · Lin never contacts Claude</span></label>
+      <label class="check-row"><input type="radio" name="claude-mode" value="ask"> <span><strong>Ask me first</strong> · quick questions stay here; for harder ones Lin asks “Send to Claude?” and shows exactly what she’d send</span></label>
+      <label class="check-row"><input type="radio" name="claude-mode" value="always"> <span><strong>Claude for conversation</strong> · everyday questions go to Claude; tasks, notes, calendar and memories are still answered here</span></label>
+     </div>
+     <label for="claude-model">Claude model</label><select id="claude-model"></select>
+     <p id="claude-state" class="small-note" role="status">Checking Claude Code…</p>
+     <div class="brain-actions"><button id="claude-check" type="button">Check again</button></div>
+     <p class="small-note">What Claude sees: your question and, so a follow-up makes sense, the last thing you two said. Never your notes, memories, tasks, calendar, profile or files, and nothing from a private conversation. Say “ask Claude …” any time. It uses your plan’s usage, which is shared with claude.ai.</p>
+     <p id="claude-week" class="small-note"></p>
+    </div></section>
+   <section class="panel"><h2>Talking hands-free</h2><p>Press the microphone once and talk. Lin sends your words after a short pause, stops listening while she speaks, and listens again when she’s done. Press it again, or Escape, to stop. Space interrupts her.</p><label class="check-row"><input id="mic-review" type="checkbox"> Let me review what Lin heard before sending</label><label class="slider">Pause before sending <output id="silence-value">0.7 s</output><input id="silence-ms" type="range" aria-label="Pause before sending" min="500" max="2000" step="100" value="700"></label><p id="mic-timer" class="small-note">Up to 30 seconds per turn.</p><div id="mic-recovery" hidden><p>Your browser or Windows may be blocking the microphone. Open Lin in your regular browser and allow the microphone when asked.</p><button id="open-browser" type="button">Open Lin in browser</button><p>If it is still blocked, check the site’s microphone permission and Windows microphone privacy settings.</p></div><button id="discard" type="button" hidden>Discard recording</button><div id="transcript-panel" hidden><label for="transcript">What Lin heard</label><textarea id="transcript" rows="2" maxlength="2000"></textarea><button id="use-transcript" type="button">Use as my request</button></div><p class="small-note">Microphone: <span id="mic-indicator">off</span>. Speech is transcribed on this computer.</p><div class="pron-set"><h3 id="pron-heading">How Lin says words</h3><p class="small-note">One per line, like “CCTC = C C T C” or a name the way you say it. Lin uses these every time she speaks; the caption keeps the normal spelling.</p><label for="pron-text" class="visually-hidden">How Lin says words</label><textarea id="pron-text" rows="4" maxlength="6000" placeholder="CCTC = C C T C"></textarea><div class="brain-actions"><button id="pron-save" type="button">Save</button><button id="pron-test" type="button">Hear them</button></div><p id="pron-status" class="small-note" role="status"></p></div></section>
    <section class="panel"><h2>Conversation</h2><p id="context-state">Recent chat stays in this session. Save lasting facts in Memory.</p><label class="check-row"><input id="greet-voice" type="checkbox" checked> Greet me out loud when Lin opens</label><button id="clear-context" type="button">Clear conversation</button><p id="reasoning-state" class="small-note" role="status">Loading local reasoning…</p><div class="engine-line"><span id="engine-dot"></span><span id="engine-state" role="status">Starting local voice…</span></div></section>
    <section class="panel"><h2>Voice preview</h2><form id="speak-form"><label for="response-input">Write something for Lin to say</label><textarea id="response-input" maxlength="600" rows="3">Hi. I’m Lin. Let’s take this one step at a time.</textarea><p class="small-note"><span id="char-count">0 / 600</span></p><div class="brain-actions"><button id="generate" class="primary" type="submit" disabled>Speak with Lin</button><button id="demo" type="button" disabled>Play saved introduction</button></div></form><canvas id="waveform" width="480" height="64" aria-hidden="true"></canvas></section>
    <section class="panel"><h2>Close Lin</h2><p>Unloading frees memory and the graphics card. Open Lin again with Open Lin.cmd.</p><button id="shutdown" type="button">Unload Lin and close session</button><p class="small-note">Personal evaluation · voice model licence is non-commercial.</p></section>

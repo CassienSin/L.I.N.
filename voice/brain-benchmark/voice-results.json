@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "checks": [
+    "The voice reads lists as “First, Second”, and says times, money, percentages, units, ranges, dates, ordinals, symbols, links and acronyms as words; your own pronunciations come first",
+    "Each sentence loses its dead air (about 1 s of silence becomes under 0.2 s), fades in and out without a click, and every sentence is equally loud with no clipping",
+    "Long answers are spoken in full, up to 16 sentences (it was 8); the local brain ends on a whole sentence instead of a fragment",
+    "“How Lin says words” is saved on this PC and used for every sentence she speaks"
+  ]
+}

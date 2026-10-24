@@ -2,15 +2,15 @@
   "passed": true,
   "checks": [
     "A spoken-style add request becomes an approval card; nothing is written before approval; edited details void the earlier approval",
-    "Approval executes once and verifies the new task; repeat approval is refused; Activity shows the receipt; Undo removes the task",
+    "A quick click does not approve; holding until the ring fills does. Approval executes once and verifies the new task; repeat approval is refused; Activity shows the receipt; Undo removes the task",
     "Declined proposals execute nothing",
     "Mark-done requests match one saved task, change it only after approval, and can be reopened from Activity",
     "Read requests show a checked-sources card (Saved tasks) with verification status",
     "Approval card and Activity fit 390/320 px layouts; no page errors or external requests",
-    "Conversation answers stream to the voice: first audio 11168 ms after asking, 4 sentence(s) played to completion"
+    "Conversation answers stream to the voice: first audio 11691 ms after asking, 3 sentence(s) played to completion"
   ],
   "timings": {
-    "request_to_first_audio_ms": 11168
+    "request_to_first_audio_ms": 11691
   },
-  "date": "2026-10-23T08:25:18.123Z"
+  "date": "2026-10-23T18:40:31.494Z"
 }

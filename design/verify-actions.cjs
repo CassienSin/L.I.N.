@@ -45,8 +45,12 @@ setTimeout(()=>{step('Timed out after 15 minutes');process.exit(2);},15*60*1000)
   assert.equal((await raw('/api/actions/approve',{id:first.id,hash:first.hash})).status,409);assert.deepEqual(await mine(),[]);
   (m=>{step('passed: '+m);return checks.push(m);})('A spoken-style add request becomes an approval card; nothing is written before approval; edited details void the earlier approval');
 
-  // 2. Approve executes exactly once and leaves an undoable receipt.
-  await card.locator('button.primary').click();await page.waitForFunction(()=>document.querySelector('#answer-actions .action-card')?.classList.contains('state-executed'));
+  // 2. Approve executes exactly once and leaves an undoable receipt. A quick click is not enough: you hold until the ring fills.
+  assert.equal(await card.locator('button.primary').textContent(),'Hold to approve');
+  await card.locator('button.primary').click();await page.waitForTimeout(500);
+  assert.ok(await page.locator('#answer-actions .action-card.state-proposed').count(),'a quick click does not approve');assert.deepEqual(await mine(),[]);
+  assert.match(await card.locator('.action-status').textContent(),/Keep holding/);
+  await card.locator('button.primary').click({delay:900});await page.waitForFunction(()=>document.querySelector('#answer-actions .action-card')?.classList.contains('state-executed'));
   let tasks=await mine();assert.equal(tasks.length,1);assert.equal(tasks[0].minutes,35);assert.equal(tasks[0].priority,1);
   const revised=(await api('/api/actions')).actions.find(a=>a.id===first.id);assert.equal(revised.state,'executed');
   assert.equal((await raw('/api/actions/approve',{id:first.id,hash:revised.hash})).status,409);assert.equal((await mine()).length,1);
@@ -54,7 +58,7 @@ setTimeout(()=>{step('Timed out after 15 minutes');process.exit(2);},15*60*1000)
   assert.match(await page.locator('#activity-list .activity-item.state-executed').first().textContent(),new RegExp(tag));
   await page.evaluate(()=>document.dispatchEvent(new CustomEvent('lin:view',{detail:'chat'})));await card.locator('button',{hasText:'Undo'}).click();
   await page.waitForFunction(()=>document.querySelector('#answer-actions .action-card')?.classList.contains('state-undone'));assert.deepEqual(await mine(),[]);
-  (m=>{step('passed: '+m);return checks.push(m);})('Approval executes once and verifies the new task; repeat approval is refused; Activity shows the receipt; Undo removes the task');
+  (m=>{step('passed: '+m);return checks.push(m);})('A quick click does not approve; holding until the ring fills does. Approval executes once and verifies the new task; repeat approval is refused; Activity shows the receipt; Undo removes the task');
 
   // 3. Declining executes nothing.
   await ask(`Add a task to ${tag} decline check`);await card.waitFor({state:'visible',timeout:120000});
@@ -65,7 +69,10 @@ setTimeout(()=>{step('Timed out after 15 minutes');process.exit(2);},15*60*1000)
   await idle();let planner=await api('/api/planner');await api('/api/planner/save',{revision:planner.revision,title:`${tag} send invoice`,scope:'business',priority:2,minutes:10});
   await ask(`Mark ${tag} send invoice as done`);await card.waitFor({state:'visible',timeout:120000});
   assert.match(await card.textContent(),new RegExp(`Mark “${tag} send invoice” as done`));assert.equal((await mine())[0].done,false);
-  await card.locator('button.primary').click();await page.waitForFunction(()=>document.querySelector('#answer-actions .action-card')?.classList.contains('state-executed'));
+  // From the keyboard: press it twice. The first press only arms it.
+  await card.locator('button.primary').focus();await page.keyboard.press('Enter');
+  assert.equal(await card.locator('button.primary').textContent(),'Press again to approve');assert.equal((await mine())[0].done,false);
+  await page.keyboard.press('Enter');await page.waitForFunction(()=>document.querySelector('#answer-actions .action-card')?.classList.contains('state-executed'));
   assert.equal((await mine())[0].done,true);
   await page.locator('#view-activity').click();await page.waitForFunction(t=>document.querySelector('#activity-list').textContent.includes(t+' send invoice'),tag);
   await page.locator('#activity-list .activity-item.state-executed',{hasText:tag}).first().locator('button',{hasText:'Undo'}).click();

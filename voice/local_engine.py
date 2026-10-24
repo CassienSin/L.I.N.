@@ -1,4 +1,8 @@
-"""Local-only Lin A speech adapter, shared by benchmarks and the voice prototype."""
+"""Local-only Lin speech adapter, shared by benchmarks, the voice lab and the voice prototype.
+voice/voice.json (optional) picks the reference sample Lin's voice is copied from and how lively she sounds:
+{"reference": "auditions/....wav", "reference_text": "...", "class_temperature": 0.3, "guidance_scale": 2.0}.
+Without it, Lin A (auditions/lin-a-english.wav) and the model's own settings are used."""
+import json
 import time
 from offline import BASE
 
@@ -20,24 +24,34 @@ class LocalVoice:
             str(BASE / 'models' / 'omnivoice'), device_map='cuda',
             dtype=self.dtype, load_asr=False, attn_implementation='sdpa',
         ).eval()
-        self.prompt = self.model.create_voice_clone_prompt(
-            ref_audio=str(BASE / 'auditions' / 'lin-a-english.wav'),
-            ref_text=REFERENCE_TEXT,
-        )
+        try:
+            self.settings = json.loads((BASE / 'voice.json').read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            self.settings = {}
+        reference = BASE / str(self.settings.get('reference') or 'auditions/lin-a-english.wav')
+        if not reference.is_file() or BASE not in reference.resolve().parents:
+            reference, self.settings = BASE / 'auditions' / 'lin-a-english.wav', {}
+        self.reference = reference.name
+        self.prompt = self.clone_prompt(reference, self.settings.get('reference_text') or REFERENCE_TEXT)
+        # Only the two settings the voice lab compares; anything else in voice.json is ignored.
+        self.style = {k: float(self.settings[k]) for k in ('class_temperature', 'guidance_scale') if isinstance(self.settings.get(k), (int, float))}
         torch.cuda.synchronize()
         self.load_seconds = round(time.perf_counter() - started, 3)
         self.sample_rate = self.model.sampling_rate
 
-    def generate(self, text, steps=32, seed=42, design=False):
+    def clone_prompt(self, path, text):
+        return self.model.create_voice_clone_prompt(ref_audio=str(path), ref_text=text)
+
+    def generate(self, text, steps=32, seed=42, design=False, instruct=None, prompt=None, style=None):
         torch.manual_seed(seed)
         torch.cuda.reset_peak_memory_stats()
         torch.cuda.synchronize()
         started = time.perf_counter()
-        args = {'text': text, 'language': 'en', 'num_step': steps, 'speed': .96}
+        args = {'text': text, 'language': 'en', 'num_step': steps, 'speed': .96, **(self.style if style is None else style)}
         if design:
-            args['instruct'] = 'female, young adult, moderate pitch'
+            args['instruct'] = instruct or 'female, young adult, moderate pitch'
         else:
-            args['voice_clone_prompt'] = self.prompt
+            args['voice_clone_prompt'] = prompt or self.prompt
         with torch.inference_mode():
             wave = np.asarray(self.model.generate(**args)[0], dtype=np.float32).reshape(-1)
         torch.cuda.synchronize()
@@ -67,7 +81,7 @@ class LocalVoice:
         started = time.perf_counter()
         with torch.inference_mode():
             waves = self.model.generate(text=list(texts), language=['en'] * len(texts), voice_clone_prompt=[self.prompt] * len(texts),
-                                        num_step=steps, speed=[.96] * len(texts))
+                                        num_step=steps, speed=[.96] * len(texts), **self.style)
         torch.cuda.synchronize()
         share = (time.perf_counter() - started) / len(texts)
         torch.cuda.empty_cache()

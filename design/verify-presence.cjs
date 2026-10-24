@@ -24,14 +24,15 @@ async function cleanup(){try{for(const a of (await api('/api/actions')).actions)
   const profile=await api('/api/profile'),greeting=(await api('/api/greeting')).text;
 
   // 1. Greeting with real numbers, spoken after the first click.
-  assert.match(greeting,new RegExp(`^Good (morning|afternoon|evening), ${profile.name}\\.`));assert.match(greeting,/Lin Brain has \d+ notes? and \d+ memor/);assert.match(greeting,/open task|task list is clear/);
+  assert.ok(greeting.includes(profile.name),greeting);assert.match(greeting,/\?$/,'the greeting ends with a question');assert.doesNotMatch(greeting,/Lin Brain has \d+/,'no robotic counts');
+  assert.equal((await api('/api/greeting')).text,greeting,'the same visit gets the same greeting');
   await page.waitForFunction(t=>document.querySelector('#sentences').textContent.includes(t),greeting,{timeout:120000});
   await page.mouse.click(700,300);
   await page.waitForFunction(()=>document.body.dataset.state==='speaking',null,{timeout:60000});
   const energy=await page.evaluate(async()=>{let max=0;for(let i=0;i<30;i++){max=Math.max(max,+getComputedStyle(document.querySelector('#orb')).getPropertyValue('--energy')||0);await new Promise(r=>setTimeout(r,100));}return max;});
   assert.ok(energy>0.05,`the pearl should follow Lin's voice, peak energy ${energy}`);
   await page.waitForFunction(()=>document.body.dataset.state==='complete',null,{timeout:120000});
-  pass(`Greeting uses real numbers (“${greeting.slice(0,70)}…”) and is spoken after the first click; the pearl follows her voice (peak ${energy.toFixed(2)})`);
+  pass(`Greeting sounds like her, from real data (“${greeting.slice(0,90)}…”) and is spoken after the first click; the pearl follows her voice (peak ${energy.toFixed(2)})`);
 
   async function ask(text,mode='chat'){step('asking: '+text);await idle();await page.waitForFunction(()=>!document.querySelector('#ask').disabled,null,{timeout:120000});
     await page.locator('#request-mode').selectOption(mode);await page.locator('#request-input').fill(text);await page.locator('#ask').click();}
@@ -69,7 +70,7 @@ async function cleanup(){try{for(const a of (await api('/api/actions')).actions)
   const before=(await api('/api/graph')).nodes.length;
   await card.locator('input').fill(tag);assert.equal(await card.locator('button.primary').textContent(),'Update details');await card.locator('button.primary').click();
   await page.waitForFunction(t=>document.querySelector('#answer-actions .action-card.state-proposed .action-description')?.textContent.includes(t),tag);
-  await page.locator('#answer-actions .action-card.state-proposed button.primary').click();
+  await page.locator('#answer-actions .action-card.state-proposed button.primary').click({delay:900});  // hold to approve
   await page.waitForFunction(()=>document.querySelector('#answer-actions .action-card')?.classList.contains('state-executed'),null,{timeout:30000});
   await page.waitForFunction(t=>document.querySelector('#map-status').textContent.includes(t),tag,{timeout:40000});
   const g=await api('/api/graph'),saved=g.nodes.find(n=>n.title===tag);assert.ok(saved&&saved.path.replace(/\\/g,'/').startsWith('Saved answers/'),'saved note on the map');

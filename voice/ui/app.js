@@ -15,11 +15,27 @@
  let spokenPlanRevision=null,latestPlanRevision=null;
  let spokenBriefRevision=null,latestBriefAsOf='';
  let sayText=null,lastVerification=null;
+ let pending=null;   // a follow-up request from a card: {claude: approval id, text} or {local: true, text}
+ // While Claude is answering, the emblem and the place chip show the link is open.
+ function online(on) {
+   document.body.dataset.online = on ? 'claude' : '';
+   const t = $('#place-text'); if (t) t.textContent = on ? 'Online · Claude' : 'On this PC';
+ }
  let conversation = sessionStorage.getItem('lin-conversation');
  if (!/^[a-f0-9]{32}$/.test(conversation || '')) {
    conversation = crypto.randomUUID().replaceAll('-', '');
    sessionStorage.setItem('lin-conversation', conversation);
  }
+ // Reopened Lin: carry on the conversation from where it was saved (it lives on this PC, not in the browser).
+ const newConversation = () => { conversation = crypto.randomUUID().replaceAll('-', ''); sessionStorage.setItem('lin-conversation', conversation); };
+ fetch('/api/conversation/resume', {method: 'POST', headers: {'X-Lin-Token': sessionStorage.getItem('lin-session-token') || '', 'Content-Type': 'application/json'}, body: JSON.stringify({conversation})})
+   .then(r => r.ok ? r.json() : null).then(d => {
+     if (!d || !d.resumed || !/^[a-f0-9]{32}$/.test(d.conversation || '')) return;
+     conversation = d.conversation; sessionStorage.setItem('lin-conversation', conversation);
+     const at = new Date(d.updated_at).toLocaleTimeString('en-PH', {timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit'});
+     const note = document.querySelector('#context-state'); if (note) note.textContent = `Picking up our conversation from ${at}: “${d.title}”.`;
+     document.dispatchEvent(new CustomEvent('lin:conversation-resumed', {detail: d}));
+   }).catch(() => {});
  const canvas = $('#waveform'), pen = canvas.getContext('2d');
  const clock = s => `${Math.floor((s || 0) / 60)}:${String(Math.floor((s || 0) % 60)).padStart(2, '0')}`;
  function state(name, label) { document.body.dataset.state = name; $('#voice-state').textContent = label; }
@@ -112,8 +128,10 @@
  function clearSource() { audio.pause(); audio.removeAttribute('src'); audio.load(); frame(); }
  function releaseBuffers() { buffers.forEach(b => URL.revokeObjectURL(b.url)); buffers = []; }
  function finished() {
-   running = false; paused = false; state('complete', 'READY WHEN YOU ARE');
-   $('#detail').textContent = 'Finished. Replay the response whenever you like.';
+   running = false; paused = false; online(false); state('complete', 'READY WHEN YOU ARE');
+   // How smooth it was: the longest pause between two sentences (the voice plan's target is under 200 ms).
+   const longest = gaps.length ? Math.max(...gaps) : null;
+   $('#detail').textContent = 'Finished. Replay the response whenever you like.' + (longest !== null ? ` Longest pause between sentences: ${longest} ms.` : '');
    $('#sentences').querySelectorAll('li').forEach(li => { li.classList.remove('active'); li.classList.add('done'); li.removeAttribute('aria-current'); });
    controls(); frame();
  }
@@ -140,11 +158,13 @@
      const job = await (await api(`/api/jobs/${jobId}`)).json();
      if (run !== epoch) return;
      document.dispatchEvent(new CustomEvent('lin:job', {detail: job}));
+     const viaClaude = job.decision?.tool === 'claude' && !job.checked?.fallback;
+     online(viaClaude && job.status === 'thinking');
      if (answerMode && job.texts.length > texts.length) {
        const first = !texts.length;
        texts = job.texts; drawSentences(); highlight();
        if (first) {
-         $('#source-label').textContent = 'Answer generated on this computer';
+         $('#source-label').textContent = viaClaude ? 'Claude’s answer · spoken on this computer' : 'Answer generated on this computer';
          $('#context-state').textContent = 'Recent chat stays in this session. Only facts you explicitly save become lasting memory.';
          document.dispatchEvent(new CustomEvent('lin:answer-context',{detail:job}));
          lastVerification = job.verification ?? null;
@@ -166,7 +186,7 @@
      if (job.status === 'error') throw Error(job.error || 'Local speech generation failed.');
      if (job.status === 'cancelled') { interrupt(); return; }
      done = job.status === 'complete';
-     if (job.status === 'thinking') state('thinking', 'THINKING LOCALLY');
+     if (job.status === 'thinking') state('thinking', viaClaude ? 'ASKING CLAUDE' : 'THINKING LOCALLY');
      else advance(run);
      controls();
      if (!done) pollTimer = setTimeout(() => poll(run), 250);
@@ -178,17 +198,19 @@
  }
  async function start(demo = false, ask = false, planRevision = null, briefRevision = null) {
    if (running || micBusy || !engineReady || engineBusy) return;
-   if (ask && (!reasoningReady || reasoningBusy || !$('#request-input').value.trim())) return;
+   const asked = pending; pending = null;
+   const askText = asked ? asked.text : $('#request-input').value;
+   if (ask && (!reasoningReady || reasoningBusy || !askText.trim())) return;
    const run = ++epoch; requestedAt = performance.now(); firstPlayed = false;
    requestRevision=null;
    spokenPlanRevision=planRevision;
    spokenBriefRevision=briefRevision;
-   running = true; paused = false; done = false; current = -1; jobId = null;
+   running = true; paused = false; done = false; current = -1; jobId = null; gaps = []; endedAt = 0;
    clearTimeout(pollTimer); clearSource(); releaseBuffers();
    texts = []; answerMode = ask; lastVerification = null; drawSentences();
    document.dispatchEvent(new Event('lin:response-cleared'));
    $('#request-echo').hidden = !ask;
-   $('#request-echo').textContent = ask ? $('#request-input').value.trim() : '';
+   $('#request-echo').textContent = ask ? askText.trim() : '';
    state(ask ? 'thinking' : 'preparing', ask ? 'THINKING LOCALLY' : demo ? 'LOADING SAVED INTRODUCTION' : 'PREPARING YOUR RESPONSE');
    $('#detail').textContent = demo ? 'Playing the saved example; no new generation is needed.' : 'The first sentence will play as soon as it is ready.';
    $('#source-label').textContent = demo ? 'Saved introduction' : 'Generating locally';
@@ -196,14 +218,14 @@
    controls(); audioGraph();
    if (ask && matchMedia('(max-width: 780px)').matches) $('#caption').scrollIntoView({block:'center',behavior:reduced.matches?'instant':'smooth'});
    try {
-     const response = await (await api(briefRevision!==null ? '/api/today/speak' : planRevision!==null ? '/api/planner/speak' : ask ? '/api/ask' : demo ? '/api/demo' : '/api/speak', {method:'POST', body:JSON.stringify(briefRevision!==null ? {revision:briefRevision} : planRevision!==null ? {revision:planRevision} : ask ? {text:$('#request-input').value, conversation,mode:$('#request-mode').value} : demo ? {} : {text:sayText??input.value})})).json();
+     const response = await (await api(briefRevision!==null ? '/api/today/speak' : planRevision!==null ? '/api/planner/speak' : ask ? '/api/ask' : demo ? '/api/demo' : '/api/speak', {method:'POST', body:JSON.stringify(briefRevision!==null ? {revision:briefRevision} : planRevision!==null ? {revision:planRevision} : ask ? {text:askText, conversation, mode:asked ? 'chat' : $('#request-mode').value, ...(asked?.claude ? {claude:asked.claude} : {}), ...(asked?.local ? {local:true} : {})} : demo ? {} : {text:sayText??input.value})})).json();
      sayText=null;
      if (run !== epoch) {
        await api(`/api/jobs/${response.id}/cancel`, {method:'POST', body:'{}'}).catch(() => {});
        return;
      }
      jobId = response.id; requestRevision=response.brain_revision??null;
-     if (ask) { $('#request-input').value=''; $('#request-input').dispatchEvent(new Event('input')); }
+     if (ask && !asked) { $('#request-input').value=''; $('#request-input').dispatchEvent(new Event('input')); }
      if(planRevision!==null){
        spokenPlanRevision=response.plan_revision;
        if(latestPlanRevision!==null&&latestPlanRevision>spokenPlanRevision){interrupt();return;}
@@ -219,7 +241,7 @@
    }
  }
  function interrupt() {
-   const old = jobId; epoch++; jobId = null; running = false; paused = false;
+   const old = jobId; epoch++; jobId = null; running = false; paused = false; online(false);
    clearTimeout(pollTimer); clearSource(); state('stopped', 'INTERRUPTED');
    $('#detail').textContent = 'Playback stopped. Any unfinished sentence is discarded; local computation may take a moment to finish.';
    $('#sentences').querySelectorAll('li').forEach(li => { li.classList.remove('active'); li.removeAttribute('aria-current'); });
@@ -241,6 +263,19 @@
    if(!Number.isInteger(e.detail.revision)||running||micBusy||!engineReady||engineBusy)return;
    document.dispatchEvent(new CustomEvent('lin:view',{detail:'chat'}));start(false,false,e.detail.revision);
  });
+ // From the "Send to Claude?" card: once Lin is free, ask again with the approval (or here, on this PC).
+ function whenFree(request) {
+   if (running) interrupt();
+   let tries = 0;
+   const tick = () => {
+     if (!running && !micBusy && engineReady && !engineBusy && reasoningReady && !reasoningBusy) { pending = request; start(false, true); return; }
+     if (++tries < 80) setTimeout(tick, 250);
+     else $('#detail').textContent = 'Lin is still busy. Ask again in a moment.';
+   };
+   tick();
+ }
+ document.addEventListener('lin:send-claude', e => { if (/^[a-f0-9]{32}$/.test(e.detail?.id || '') && e.detail.question) whenFree({claude: e.detail.id, text: e.detail.question}); });
+ document.addEventListener('lin:ask-local', e => { if (e.detail?.question) whenFree({local: true, text: e.detail.question}); });
  document.addEventListener('lin:say',e=>{
    if(typeof e.detail.text!=='string'||running||micBusy||!engineReady||engineBusy)return;
    sayText=e.detail.text;start();
@@ -268,13 +303,14 @@
    $('#clear-context').disabled = true;
    try {
      await api('/api/conversation/clear', {method:'POST', body:JSON.stringify({conversation})});
+     newConversation();  // a fresh conversation; the saved one stays on this PC until you ask Lin to forget it
      epoch++; jobId = null; clearTimeout(pollTimer); clearSource(); releaseBuffers();
      texts = []; current = -1; drawSentences(); $('#request-echo').hidden = true; $('#request-echo').textContent = '';
      $('#request-input').value = ''; $('#request-input').dispatchEvent(new Event('input'));
      $('#transcript').value = ''; $('#transcript-panel').hidden = true;
      $('#mic-timer').textContent = '0:00 / 0:30';
      $('#mic-status').textContent = 'Microphone off. Press Talk to Lin when you’re ready.';
-     $('#context-state').textContent = 'Conversation cleared. Your next request starts fresh.';
+     $('#context-state').textContent = 'Started a new conversation. Earlier ones stay saved on this PC until you ask Lin to forget them.';
      $('#source-label').textContent = 'Ready for a new conversation';
      document.dispatchEvent(new Event('lin:response-cleared'));
      $('#detail').textContent = 'Previous exchanges will not be included in new requests.';
@@ -307,7 +343,7 @@
  });
  $('#replay').addEventListener('click', () => {
    if (!buffers.length || running || micBusy) return;
-   epoch++; jobId = null; current = -1; done = true; paused = false; running = true;
+   epoch++; jobId = null; current = -1; done = true; paused = false; running = true; gaps = []; endedAt = 0;
    texts = buffers.map(b => b.text);
    buffers.forEach(b => { b.cached = true; });
    requestedAt = performance.now(); firstPlayed = false;
@@ -317,13 +353,17 @@
  audio.addEventListener('playing', () => {
    if (!running || paused) { audio.pause(); return; }
    state('speaking', 'SPEAKING'); highlight();
+   if (endedAt) { gaps.push(Math.round(performance.now() - endedAt)); endedAt = 0; }
+   window.linVoiceGaps = gaps;
    if (!firstPlayed) {
      firstPlayed = true;
      $('#detail').textContent = `Playback started in ${((performance.now()-requestedAt)/1000).toFixed(2)} s${buffers[current]?.cached ? ' from saved audio' : ' for new speech'}.`;
    } else $('#detail').textContent = `Speaking sentence ${current + 1} of ${texts.length}.`;
    frame();
  });
- audio.addEventListener('ended', () => { clearSource(); advance(epoch); });
+ // Straight on to the next sentence: no pause/reload in between (that left an audible gap).
+ let endedAt = 0, gaps = [];
+ audio.addEventListener('ended', () => { endedAt = performance.now(); audio.removeAttribute('src'); advance(epoch); });
  audio.addEventListener('waiting', () => { if (running && !paused) { state('waiting', 'BUFFERING AUDIO'); frame(); } });
  audio.addEventListener('timeupdate', frame);
  audio.addEventListener('pause', frame);

@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "checks": [
+    "Claude is off until you choose Ask me first or Claude for conversation; the choice and the model are saved on this PC",
+    "Lin uses Claude only when `claude auth status` says it is signed in with your Claude plan; signed out, an API key or a missing install are refused with what to do",
+    "Claude Code runs in print mode with no tools, no MCP servers, no skills or hooks, nothing saved, in an empty folder, and with no API key, token or proxy setting passed on",
+    "Claude\u2019s answer reaches Lin\u2019s voice one sentence at a time (Markdown cleaned for speech); the send log keeps only sizes and outcomes, never the words",
+    "A usage limit (with its reset time), a rate limit, no internet and a stuck Claude Code are recognised in seconds, so Lin can answer on this PC instead",
+    "An older Claude Code that lacks an option still answers; pressing Interrupt stops Claude Code within a second",
+    "Ask me first offers hard questions (explain, compare, write, code, long text) and keeps quick ones here; \u201cask Claude \u2026\u201d and \u201csend this to Claude\u201d always work",
+    "\u201cSend to Claude?\u201d sends nothing until approved, then allows exactly one send of exactly that text, in that conversation; Answer on this PC sends nothing",
+    "Every Claude answer says Claude saw only the text on the card and that Lin did not check it; a fallback says why Lin answered here instead",
+    "A hard question goes to \u201cSend to Claude?\u201d first unless it names a connected tool or its server; when no tool fits after all, Claude is still offered"
+  ]
+}

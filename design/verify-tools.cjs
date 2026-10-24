@@ -45,7 +45,7 @@ let browser;
   const args=JSON.parse(await card.locator('pre.tool-args').textContent());assert.deepEqual([args.a,args.b].sort(),[2,3]);
   page.on('response',r=>{if(r.url().includes('/api/actions/approve'))step(`approve answered ${r.status()} after click`);});
   page.on('console',m=>step('page console: '+m.text()));
-  await card.locator('button.primary').click();
+  await card.locator('button.primary').click({delay:900});  // hold to approve
   try{await page.waitForFunction(()=>document.querySelector('#answer-actions .action-card')?.classList.contains('state-executed'),null,{timeout:120000});}
   catch(e){step('answer-actions now: '+(await page.evaluate(()=>document.querySelector('#answer-actions')?.outerHTML.slice(0,1500))));step('context: '+(await page.locator('#context-state').textContent().catch(()=>'')));throw e;}
   assert.equal((await card.locator('pre.tool-output').textContent()).trim(),'5');
