@@ -110,7 +110,7 @@
    if(job.sources?.length){
      const title=document.createElement('h3');title.textContent=job.mode==='brain'?'Matching passages':'Saved facts supplied to Lin';list.append(title);
      for(const source of job.sources){
-       const b=document.createElement('button');b.className='source-reference';b.type='button';b.textContent=source.kind==='file'?`${source.title} · ${source.where||`lines ${source.line_start}–${source.line_end}`}`:`${source.title} · ${source.scope} memory`;
+       const b=document.createElement('button');b.className='source-reference';b.type='button';b.textContent=(source.kind==='file'?`${source.title} · ${source.where||`lines ${source.line_start}–${source.line_end}`}`:`${source.title} · ${source.scope} memory`)+(source.match==='meaning'?' · found by meaning':'');
        b.addEventListener('click',async()=>{try{
          const current=await api('/api/sources/'+source.id);
          $('#source-title').textContent=current.title;

@@ -57,6 +57,7 @@ try {
     Run 'Conversation memory: saving, recall, private and forget checks' $python @('verify_conversations.py')
     Run 'Claude through Claude Code (a stand-in; nothing is sent)' $python @('verify_claude.py')
     Run 'Voice: what she reads, tidied audio, no cut-offs' $python @('verify_voice.py')
+    Run 'Search by meaning (stand-in model; the real model too once installed)' $python @('verify_meaning.py')
     Run 'Lin Brain reads documents (PDF, Word, PowerPoint, Excel, photos)' $python @('verify_docs.py')
     Run 'Notes regression' $python @('verify_brain.py')
     Run 'Planner regression' $python @('verify_planner.py')

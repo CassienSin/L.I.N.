@@ -261,6 +261,8 @@
    bootLine('voice', s.error ? 'Voice · unavailable · typing works' : s.ready ? 'Voice · ready' : 'Voice · still loading · typing works now', !!s.ready);
    bootLine('brain', r.error ? 'Brain · unavailable' : r.ready ? `Brain · ${/35B/i.test(r.model || '') ? 'Smart' : 'Fast'} · ${(r.model || '').split('·')[0].trim()}` : 'Brain · loading', !!r.ready);
    if (b) bootLine('memory', `Memory · ${(b.files || 0) + (b.memories || 0)} items`, true);
+   const m = s.meaning;
+   if (m && (m.ready || !/not installed/.test(m.error || ''))) bootLine('meaning', m.ready ? `Meaning · ${m.items.toLocaleString()} indexed${m.pending ? ` · ${m.pending} to go` : ''}` : 'Meaning · loading', !!m.ready);
    const c = s.claude;
    if (c && c.mode !== 'off') bootLine('claude', c.ready ? 'Link · Claude ready' : c.limited ? 'Link · Claude limit reached' : !c.checked ? 'Link · checking Claude' : 'Link · Claude not signed in', !!c.ready);
    const t = today, next = t?.events?.filter(x => !x.all_day && new Date(x.start) > new Date()).sort((x, y) => new Date(x.start) - new Date(y.start))[0];

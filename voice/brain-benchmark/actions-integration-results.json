@@ -7,10 +7,10 @@
     "Mark-done requests match one saved task, change it only after approval, and can be reopened from Activity",
     "Read requests show a checked-sources card (Saved tasks) with verification status",
     "Approval card and Activity fit 390/320 px layouts; no page errors or external requests",
-    "Conversation answers stream to the voice: first audio 11691 ms after asking, 3 sentence(s) played to completion"
+    "Conversation answers stream to the voice: first audio 13257 ms after asking, 3 sentence(s) played to completion"
   ],
   "timings": {
-    "request_to_first_audio_ms": 11691
+    "request_to_first_audio_ms": 13257
   },
-  "date": "2026-10-23T18:40:31.494Z"
+  "date": "2026-10-24T03:06:38.206Z"
 }

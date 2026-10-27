@@ -165,6 +165,35 @@ class ConversationStore:
             r['meta'] = json.loads(r['meta'] or '{}')
         return sorted(out, key=lambda r: r['at'])
 
+    def index_items(self):
+        """Every saved turn, for search by meaning (meaning.py): (id, kind, text). Private conversations are never
+        saved, and earlier recall, privacy and forget requests are left out, as in find()."""
+        with self.db() as db:
+            rows = db.execute("SELECT t.id, t.question, t.answer FROM turns t JOIN conversations c ON c.id=t.conversation "
+                              "WHERE c.private=0 AND coalesce(json_extract(t.meta, '$.tool'), '') NOT IN "
+                              "('conversations', 'privacy', 'forget_conversations')").fetchall()
+        return [(f'turn:{r[0]}', 'turn', f'{r[1]}\n{r[2]}') for r in rows]
+
+    def by_ids(self, ids, start=None, end=None, exclude=None):
+        """The turns with these ids (from a meaning search), within the period, in the same shape as find()."""
+        ids = [int(i) for i in ids][:50]
+        if not ids:
+            return []
+        args, where = list(ids), [f"t.id IN ({','.join('?' * len(ids))})", 'c.private=0']
+        if start:
+            where.append('t.at>=?'); args.append(iso(start))
+        if end:
+            where.append('t.at<?'); args.append(iso(end))
+        if exclude:
+            where.append('t.conversation!=?'); args.append(exclude)
+        with self.db() as db:
+            rows = db.execute(f'SELECT t.*, c.title, c.summary FROM turns t JOIN conversations c ON c.id=t.conversation '
+                              f'WHERE {" AND ".join(where)}', args).fetchall()
+        out = [dict(r) for r in rows]
+        for r in out:
+            r['meta'] = json.loads(r['meta'] or '{}')
+        return sorted(out, key=lambda r: r['at'])
+
     def count(self, start=None, end=None, conversation=None):
         args, where = [], ['1=1']
         if start:

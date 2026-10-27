@@ -46,6 +46,9 @@ def for_job(job):
             if gaps:
                 out.append(f'None of the matching passages mention {quote(gaps)}.')
             out.append(f'Only the {len(sources)} closest passage{"s" if len(sources) != 1 else ""} were read, not every note.')
+            meant = sum(1 for s in sources if s.get('match') == 'meaning')
+            if meant:
+                out.append(f'{meant} of them {"was" if meant == 1 else "were"} found by meaning, not by the exact words, so check that {"it fits" if meant == 1 else "they fit"}.')
     elif c and c.get('tool') == 'document':
         if not c.get('whole'):
             out.append(f"Lin read {c.get('read')} of the {c.get('total')} passages in {c.get('title')}: the closest matches and the start, not all of it.")
@@ -64,6 +67,8 @@ def for_job(job):
             gaps = [g for g in gaps if g not in ('talk', 'talked', 'discussed', 'conversation', 'said', 'yesterday')]
             if gaps:
                 out.append(f'None of those turns mention {quote(gaps)}.')
+        if c.get('by_meaning'):
+            out.append(f"{c['by_meaning']} of these turns {'was' if c['by_meaning'] == 1 else 'were'} found by meaning, not by the exact words.")
         if c.get('private'):
             out.append('Conversations you kept private were never saved, so they could not be searched.')
         if (job.get('verification') or '').startswith('replaced'):

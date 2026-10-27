@@ -409,7 +409,7 @@ def tool_notes(brain, args):
     items = [{'id': s['id'], 'kind': s['kind'], 'title': s['title'], 'scope': s.get('scope'),
               'lines': [s.get('line_start'), s.get('line_end')] if s['kind'] == 'file' else None,
               'where': s.get('where') if s['kind'] == 'file' else None,
-              'text': ' '.join(s['body'].split())[:500]} for s in sources]
+              'text': ' '.join(s['body'].split())[:500], 'match': s.get('match')} for s in sources]
     summary = ('I could not find a matching note or saved memory for that.' if not items else
                f"The closest match is {items[0]['title']}: " + items[0]['text'][:240])
     return {'tool': 'notes', 'label': f'Notes · "{query}"', 'query': query, 'items': items, 'summary': summary,

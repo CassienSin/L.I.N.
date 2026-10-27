@@ -1,8 +1,8 @@
 {
   "passed": true,
   "checks": [
-    "Switched to Smart (Qwen3.6 35B, graphics card) in 35 s without restarting Lin, and it answered",
+    "Switched to Smart (Qwen3.6 35B, graphics card) in 40 s without restarting Lin, and it answered",
     "Switched back to Fast (Qwen3 4B, processor) in 30 s; brain.json records the choice"
   ],
-  "date": "2026-10-23T18:49:30.600Z"
+  "date": "2026-10-24T03:16:06.422Z"
 }

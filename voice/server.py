@@ -44,6 +44,7 @@ CONV = None              # conversations.ConversationStore: every exchange, kept
 LOADED = set()           # conversations whose saved turns were already loaded back into memory this run
 LAST_ASK = [0.0]         # when the last request arrived (summaries wait until Lin has been idle a while)
 CLOUD = None             # cloud_brain.ClaudeBrain: Claude through Claude Code, only when you turn it on
+MEANING = None           # meaning.MeaningIndex: search by meaning, on this PC, once its model is installed
 
 def today_briefing():
     from calendar_store import briefing
@@ -453,6 +454,13 @@ def use_recall(job, history, started, cancelled):
     step(job, 'Looking through our saved conversations' + (f' from {label}' if label else ''))
     with LOCK:
         rows = CONV.find(words, start, end, limit=12)
+        by_meaning = []
+        if words and MEANING:
+            # "Did we talk about my thesis worries?" also finds the turn about "the panel's concerns".
+            hits = [i.split(':', 1)[1] for i, _ in MEANING.search(' '.join(words), kind='turn', k=8)]
+            seen = {r['id'] for r in rows}
+            by_meaning = [r for r in CONV.by_ids(hits, start, end) if r['id'] not in seen]
+            rows = sorted(rows + by_meaning, key=lambda r: r['at'])[-12:]
         if words and not rows:
             rows_any = CONV.find([], start, end, limit=8) if label else []
         else:
@@ -463,6 +471,7 @@ def use_recall(job, history, started, cancelled):
     topic = ' '.join(words)
     job['checked'] = {'tool': 'conversations', 'label': f"{len(rows)} saved turn{'s' if len(rows) != 1 else ''}" + (f' · {label}' if label else ''),
                       'period': label, 'topic': topic, 'private': private, 'available': True, 'summary': '',
+                      'by_meaning': len([r for r in by_meaning if r in rows]),
                       'items': [{'when': conv.when_text(r['at']), 'question': r['question'][:220], 'answer': r['answer'][:260]} for r in rows[-8:]]}
     annotate(job)
     if not rows:
@@ -629,6 +638,22 @@ def use_claude(job, history, payload, started, cancelled):
         record_timings(job)
         job['verification'] = f'local fallback ({exc.kind})'
         return spoken + ' ' + answer, round(time.perf_counter()-started, 3)
+
+def meaning_worker():
+    """Keeps the meaning index in step with Lin Brain and saved conversations, only while Lin is idle."""
+    if CLOSING.wait(20):
+        return
+    busy = lambda: CLOSING.is_set() or STATE['busy'] or REASON_STATE['busy']
+    while not CLOSING.is_set():
+        if MEANING and BRAIN and not busy():
+            try:
+                items = BRAIN.index_items() + (CONV.index_items() if CONV else [])
+                MEANING.sync(items, stop=busy, batch=8)
+            except Exception:
+                import traceback
+                traceback.print_exc()
+        if CLOSING.wait(15):
+            return
 
 def claude_watcher():
     """Re-checks the Claude Code sign-in every 10 minutes while Claude is on, never while Lin is answering."""
@@ -1050,6 +1075,7 @@ class Handler(BaseHTTPRequestHandler):
                                   'brain':BRAIN.status() if BRAIN else None,
                                   'conversations':CONV.stats() if CONV else None,
                                   'claude':CLOUD.summary() if CLOUD else None,
+                                  'meaning':MEANING.status() if MEANING else None,
                                   'planner_revision':PLANNER.revision() if PLANNER else None,
                                   'actions_revision':ACTIONS.revision() if ACTIONS else None,
                                   'mcp_revision':MCP.status_revision if MCP else None,
@@ -1292,6 +1318,8 @@ class Handler(BaseHTTPRequestHandler):
                         result = ACTIONS.approve(action_id, body.get('hash'))
                         if result.get('tool') == 'forget_conversations':
                             CONVERSATIONS.clear(); LAST_LIST.clear()  # forgotten turns cannot linger in chat memory
+                            if MEANING and CONV:
+                                MEANING.prune('turn', [i for i, _, _ in CONV.index_items()])  # nor in search by meaning
                     elif path.endswith('/undo') and (ACTIONS.get(action_id) or {}).get('tool') == 'forget_conversations':
                         result = ACTIONS.undo(action_id)
                         LOADED.clear()
@@ -1658,6 +1686,10 @@ def main():
     from conversations import ConversationStore
     CONV=ConversationStore(data_dir)
     ACTIONS.conversations=CONV
+    global MEANING
+    from meaning import MeaningIndex
+    MEANING = MeaningIndex(data_dir)
+    BRAIN.meaning = MEANING
     global CLOUD
     from cloud_brain import ClaudeBrain
     # Demo checks only: a stand-in that never connects anywhere, so the checks don't use your Claude plan.
@@ -1679,6 +1711,7 @@ def main():
     threading.Thread(target=reasoning_worker, daemon=True).start()
     threading.Thread(target=brain_watcher, daemon=True).start()
     threading.Thread(target=claude_watcher, daemon=True).start()
+    threading.Thread(target=meaning_worker, daemon=True).start()
     print(f'Lin voice prototype: http://{host}/ (use the session link from the launcher)', flush=True)
     try:
         server.serve_forever()

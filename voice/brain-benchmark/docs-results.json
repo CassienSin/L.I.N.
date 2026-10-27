@@ -10,7 +10,7 @@
     "Scanned PDF page and a photo of a whiteboard read with Windows text recognition (offline)",
     "Unchanged documents are never re-read; an edited one is re-read and a deleted one leaves search and the cache",
     "Questions that name a document (\"summarize the harbor report\") read that file, page by page, with an honest coverage line",
-    "9 documents read in 11 s; the map lists them with page places"
+    "9 documents read in 9 s; the map lists them with page places"
   ],
   "reader": "C:\\Users\\Aljho\\Documents\\L.I.N\\tools\\docs-venv\\Scripts\\python.exe",
   "windows_ocr": true

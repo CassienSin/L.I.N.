@@ -159,6 +159,7 @@ class Brain:
         self.fingerprint = None
         self.full_at = 0.0
         self.extract_revision = 0
+        self.meaning = None             # meaning.MeaningIndex, set by the server once the model is installed
         with self.db() as db:
             db.executescript('''
                 PRAGMA secure_delete=ON;
@@ -562,20 +563,45 @@ class Brain:
         return [self.source(sid) for sid in chosen], len(chosen) == len(rows), len(rows)
 
     def search(self, query, kind=None, refresh=True):
+        """The three best passages or memories: exact words (FTS) mixed with meaning (meaning.py) when it is installed.
+        Each result says how it was found: source['match'] is 'words', 'meaning' or 'both'."""
         if refresh:
             self.scan(force=True)
-        words=terms(plain(query,1000,'Search'))
-        if not words:
-            return []
-        expression=' OR '.join('"'+word+'"' for word in dict.fromkeys(words))
+        query=plain(query,1000,'Search')
+        words=terms(query)
+        ids=[]
+        if words:
+            expression=' OR '.join('"'+word+'"' for word in dict.fromkeys(words))
+            with self.db() as db:
+                sql='SELECT s.id FROM search JOIN sources s ON s.id=search.id WHERE search MATCH ?'
+                args=[expression]
+                if kind:
+                    sql+=' AND s.kind=?';args.append(kind)
+                sql+=' ORDER BY bm25(search,0,3,1),s.id LIMIT 8'
+                ids=[r['id'] for r in db.execute(sql,args)]
+        hits=[]
+        if self.meaning is not None:
+            try:
+                hits=self.meaning.search(query,kind=kind or ('file','memory'),k=8)
+            except Exception:
+                hits=[]   # meaning search is a bonus; word search always works
+        if hits:
+            from meaning import fuse
+            chosen=fuse(ids,hits,3)
+        else:
+            chosen=[(i,'words') for i in ids[:3]]
+        out=[]
+        for sid,how in chosen:
+            source=self.source(sid)
+            if source and (not kind or source['kind']==kind):
+                source['match']=how
+                out.append(source)
+        return out
+
+    def index_items(self):
+        """Everything in Lin Brain, for search by meaning: (id, kind, text)."""
         with self.db() as db:
-            sql='SELECT s.id FROM search JOIN sources s ON s.id=search.id WHERE search MATCH ?'
-            args=[expression]
-            if kind:
-                sql+=' AND s.kind=?';args.append(kind)
-            sql+=' ORDER BY bm25(search,0,3,1),s.id LIMIT 3'
-            ids=[r['id'] for r in db.execute(sql,args)]
-            return [self.source(sid) for sid in ids]
+            return [(r[0], r[1], (r[2] + '\n' + r[3])[:2000]) for r in db.execute('SELECT id,kind,title,body FROM sources')]
 
 ASKS_ABOUT = re.compile(r"\b(summar\w*|read|say|says|said|according|explain\w*|key points|main points|tl;?dr|overview|"
                         r"what(?:'s| is) in|in (?:the|my)|from (?:the|my)|about (?:the|my)|document|file|report|pdf|docx?|"

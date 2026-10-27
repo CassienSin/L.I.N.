@@ -40,7 +40,7 @@
    if(c.tool==='notes')for(const item of c.items){
      const open=node('button',item.kind==='file'?`Open passage · ${item.where||`lines ${item.lines[0]}–${item.lines[1]}`}`:'Open saved memory','source-reference');open.type='button';
      open.addEventListener('click',async()=>{try{const s=await api('/api/sources/'+item.id);$('#source-title').textContent=s.title;$('#source-meta').textContent=s.kind==='file'?`${s.path} · ${s.where||`lines ${s.line_start}–${s.line_end}`}${s.document?' · read from '+s.document:''}`:`Saved explicitly by you · ${s.scope}`;const pre=node('pre',s.body);$('#source-content').replaceChildren(pre);$('#source-dialog').showModal();}catch(err){open.textContent=err.message;open.disabled=true;}});
-     add(item.title,item.text.slice(0,160)+(item.text.length>160?'…':''),open);
+     add(item.title+(item.match==='meaning'?' · found by meaning':''),item.text.slice(0,160)+(item.text.length>160?'…':''),open);
    }
    if(c.tool==='document'){
      for(const s of job.sources||[]){
